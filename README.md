@@ -1,6 +1,9 @@
 # MidKnight Magic Too Team 9042
 This is the official repository for the 2016-17 season Velocity Vortex.
 
+#Vuforia
+The key for 9042 is:  AU+Uvo3/////AAAAGdjYkc8TVkvGi3gbOyzI/78U4cJXgtsDrKQQzVxuphNb8X7dpRSTS8cbzdTtVsdwde7l+kFjJnNEOm1NFffYgG/rf8Z3+gLanvBF7rpIHNPwFsbLR1GxJJQth2kFif2tYIOXSTJ7oQQZDcUojld9UR70afiVxqCqQHbuueadf7KQBOgihBye/RLvQc2dkSDQt3o/J++1NpwEhuguCsJVlBX/C576EQ23DkmR+vmVJPiW78U7I9yEQLsRRtYOe4LhkwV6GdmkweJshkO99nzNjF28+BeODZakEImq6lJQDTHsKvlYXvIolqIzoUNSMppMB35iFGc6qhgoo9O1yqpsum2clDulBglIVpjD3MLRalK8
+
 # ftc_app
 FTC Android Studio project to create FTC Robot Controller app.
 
