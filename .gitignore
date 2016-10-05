@@ -1,3 +1,6 @@
+#weird files
+*.xml
+
 # built application files
 *.apk
 *.ap_
