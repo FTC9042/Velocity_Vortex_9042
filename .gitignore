@@ -5,6 +5,9 @@
 # Java class files
 *.class
 
+# vim classes
+*.swp
+
 # generated files
 bin/
 gen/
@@ -26,4 +29,4 @@ build/
 
 *ASUS_PC_01*
 
- *.xml 
+.heads/
