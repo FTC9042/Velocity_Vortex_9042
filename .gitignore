@@ -1,9 +1,15 @@
+#weird files
+*.xml
+
 # built application files
 *.apk
 *.ap_
 
 # Java class files
 *.class
+
+# vim classes
+*.swp
 
 # generated files
 bin/
@@ -26,4 +32,5 @@ build/
 
 *ASUS_PC_01*
 
- *.xml 
+.heads/
+

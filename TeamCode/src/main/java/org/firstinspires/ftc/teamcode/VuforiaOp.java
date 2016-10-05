@@ -19,6 +19,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
  * Created by Tim on 9/30/2016.
  */
 @TeleOp(name="Vuforia Test", group ="Tests")
+
 //@Disabled
 
 public class VuforiaOp extends LinearOpMode {
@@ -30,7 +31,7 @@ public class VuforiaOp extends LinearOpMode {
         para.cameraMonitorFeedback = VuforiaLocalizer.Parameters.CameraMonitorFeedback.AXES;
 
         VuforiaLocalizer vuforia = ClassFactory.createVuforiaLocalizer(para);
-//        Vuforia.setHint(HINT.HINT_MAX_SIMULTANEOUS_IMAGE_TARGETS, 4);
+        Vuforia.setHint(HINT.HINT_MAX_SIMULTANEOUS_IMAGE_TARGETS, 4);
 
         VuforiaTrackables beacons = vuforia.loadTrackablesFromAsset("FTC_2016-17");
         beacons.get(0).setName("Wheels");
@@ -40,23 +41,24 @@ public class VuforiaOp extends LinearOpMode {
 
         waitForStart();
 
-        while(opModeIsActive()){
-            for(VuforiaTrackable beacon : beacons){
-                OpenGLMatrix pose = ((VuforiaTrackableDefaultListener) beacon.getListener()).getPose();
-                telemetry.addData(beacon.getName() + "-Visible", ((VuforiaTrackableDefaultListener) beacon.getListener()).isVisible() ? "Visible" : "Not Visible");
+        beacons.activate();
 
-                if(pose!=null){
+        while (opModeIsActive()) {
+            for (VuforiaTrackable beacon : beacons) {
+                OpenGLMatrix pose = ((VuforiaTrackableDefaultListener) beacon.getListener()).getPose();
+
+                if (pose != null) {
                     VectorF translation = pose.getTranslation();
-                    telemetry.addData(beacon.getName() + "-Visible", ((VuforiaTrackableDefaultListener) beacon.getListener()).isVisible() ? "Visible" : "Not Visible");
+//                    telemetry.addData(beacon.getName() + "-Visible", ((VuforiaTrackableDefaultListener) beacon.getListener()).isVisible() ? "Visible" : "Not Visible");
                     telemetry.addData(beacon.getName() + "-Translation", translation);
 
-                    double degreeToTurn = Math.toDegrees(Math.atan2(translation.get(1), translation.get(2)));
+                    double degreeToTurn = Math.toDegrees(Math.atan2(translation.get(1), translation.get(2))); //If phone is vertical
 
-                    telemetry.addData(beacon.getName()+"-Degrees", degreeToTurn);
+                    telemetry.addData(beacon.getName() + "-Degrees", degreeToTurn);
                 }
             }
 
-            telemetry.addData("Time", this.getRuntime());
+//            telemetry.addData("Time", this.getRuntime());
             telemetry.update();
         }
     }
