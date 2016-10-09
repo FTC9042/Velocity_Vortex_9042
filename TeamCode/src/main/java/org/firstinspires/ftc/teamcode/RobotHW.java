@@ -57,15 +57,6 @@ public class RobotHW {
     }
 
     /***
-<<<<<<< HEAD
-     *
-=======
->>>>>>> 5258817aa18d03b5d6fdf05944925c076c567a9a
-     * waitForTick implements a periodic delay. However, this acts like a metronome with a regular
-     * periodic tick.  This is used to compensate for varying processing times for each cycle.
-     * The function looks at the elapsed cycle time, and sleeps for the remaining time interval.
-     *
-<<<<<<< HEAD
      * @param periodMs  Length of wait cycle in mSec.
      * @throws InterruptedException
      */

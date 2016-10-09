@@ -33,34 +33,22 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
-import org.firstinspires.ftc.robotcontroller.external.samples.HardwarePushbot;
+@Autonomous(name="New Robot Drive", group="Tests")
+//@Disabled
+public class NewRobotTest extends LinearOpMode{
 
-@Autonomous(name="Encoder Drive", group="Tests")
-@Disabled
-public class DriveWithEncoderTemplate extends LinearOpMode{
-
-    OldRobot robot   = new OldRobot();
+    NewRobot robot   = new NewRobot();
     private ElapsedTime     runtime = new ElapsedTime();
 
     //encoder targets
     private int rightTarget,
             leftTarget;
 
-    //SERVO CONSTANTS
-    private final double SERVO_MAX = .6,
-            SERVO_MIN = .2,
-            SERVO_NEUTRAL = 9.0 / 17;
-
-    private final int PROPELLER_RIGHT = -140,
-            PROPELLER_LEFT = 140;
-    //Stops the continuous servo
 
     //MOTOR RANGES
     private final double MOTOR_MAX = 1,
@@ -82,85 +70,73 @@ public class DriveWithEncoderTemplate extends LinearOpMode{
 
         robot.init(hardwareMap);
 
-        telemetry.addData("Status", "Resetting Encoders");    //
+        telemetry.addData("Status", "Resetting Encoders | Left:"+ robot.backLeft.getCurrentPosition()+" Right:"+robot.backRight.getCurrentPosition());    //
         telemetry.update();
         setDirection();
-        robot.Gyro.calibrate();
+//        robot.Gyro.calibrate();
         resetEncoders();
         idle();
-        telemetry.addData("Status","Gyro Sensor Heading is "+robot.Gyro.getHeading());
-        telemetry.update();
+//        telemetry.addData("Status","Gyro Sensor Heading is "+robot.Gyro.getHeading());
+//        telemetry.update();
         waitForStart();
 
         telemetry.addData("Status", "Forward 48 Inches");    //
         telemetry.update();
-        runStraight(48, 10);  // S1: Forward 48 Inches with 5 Sec timeout
+        runStraight(48, 15);  // S1: Forward 48 Inches with 5 Sec timeout
         telemetry.addData("Status", " Turning Left 90 degrees");    //
         telemetry.update();
         resetEncoders();
-        turnRightWithGyro(90,10);  // S2: Turn Right 90 degrees with 10 Sec timeout
+        turnRight(90,15);  // S2: Turn Right 90 degrees with 10 Sec timeout
         telemetry.addData("Status", " Moving Backwards 12 Inches");    //
         telemetry.update();
         resetEncoders();
-        runStraight(-12, 10);  // S3: Reverse 24 Inches with 4 Sec timeout
+        runStraight(-12, 15);  // S3: Reverse 24 Inches with 4 Sec timeout
         telemetry.addData("Path", "Complete");
         telemetry.update();
     }
 
 
     public void setDirection() {
-        if (robot.frontLeft.getDirection() == DcMotor.Direction.FORWARD) {
-            robot.frontLeft.setDirection(DcMotor.Direction.REVERSE);
+        if (robot.backLeft.getDirection() == DcMotor.Direction.REVERSE) {
+            robot.backLeft.setDirection(DcMotor.Direction.FORWARD);
         }
-
-        if (robot.backLeft.getDirection() == DcMotor.Direction.FORWARD) {
-            robot.backLeft.setDirection(DcMotor.Direction.REVERSE);
-        }
-
-        if (robot.frontRight.getDirection() == DcMotor.Direction.REVERSE) {
-            robot.frontRight.setDirection(DcMotor.Direction.FORWARD);
-        }
-
-        if (robot.backRight.getDirection() == DcMotor.Direction.REVERSE) {
-            robot.backRight.setDirection(DcMotor.Direction.FORWARD);
-        }
-
-        if (robot.armMotor1.getDirection() == DcMotor.Direction.FORWARD) {
-            robot.armMotor1.setDirection(DcMotor.Direction.REVERSE);
+        if (robot.backRight.getDirection() == DcMotor.Direction.FORWARD) {
+            robot.backRight.setDirection(DcMotor.Direction.REVERSE);
         }
     }
 
 
     //ENCODER MANIPULATION
     public boolean resetEncoders() {
-        robot.frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robot.backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        robot.frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robot.backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        return ((robot.frontLeft.getCurrentPosition() == 0) &&
-                (robot.backLeft.getCurrentPosition() == 0) &&
-                (robot.frontRight.getCurrentPosition() == 0) &&
+//        return ((robot.frontLeft.getCurrentPosition() == 0) &&
+//                (robot.backLeft.getCurrentPosition() == 0) &&
+//                (robot.frontRight.getCurrentPosition() == 0) &&
+//                (robot.backRight.getCurrentPosition() == 0));
+//
+        return ((robot.backLeft.getCurrentPosition() == 0) &&
                 (robot.backRight.getCurrentPosition() == 0));
 
     }
 
     public void setToEncoderMode() {
 
-        robot.frontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        robot.frontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         robot.backLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        robot.frontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        robot.frontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         robot.backRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
 
     public void setToWOEncoderMode() {
 
-        robot.frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+//        robot.frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         robot.backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        robot.frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+//        robot.frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         robot.backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
@@ -173,11 +149,11 @@ public class DriveWithEncoderTemplate extends LinearOpMode{
         setToEncoderMode();
         setTargetValueMotor();
             runtime.reset();
-            setMotorPower(.5,.5);
+            setMotorPower(.3,.3);
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && (!hasReached())) {
                 // Display it for the driver.
-                telemetry.addData("Path1",  "Running to %7d :%7d", rightTarget, leftTarget);
-                telemetry.addData("Path2",  "Running at %7d :%7d", robot.backLeft.getCurrentPosition(), robot.backRight.getCurrentPosition());
+                telemetry.addData("Right Motor",  "Target %7d: Current Pos %7d: Speed is %7f", rightTarget, robot.backRight.getCurrentPosition(),robot.backRight.getPower());
+                telemetry.addData("Left Motor",  "Target %7d: Current Pos %7d: Speed is %7f", leftTarget, robot.backLeft.getCurrentPosition(),robot.backLeft.getPower());
                 telemetry.update();
 
                 // Allow time for other processes to run.
@@ -185,21 +161,21 @@ public class DriveWithEncoderTemplate extends LinearOpMode{
             }
             setMotorPower(0,0);
             setToWOEncoderMode();
-            sleep(250);
+            sleep(2000);
         }
     }
     public  void turnRight(int angle, int timeoutS) throws InterruptedException{
         if (opModeIsActive()){
         leftTarget = (int)(angle*INCHES_PER_DEGREE*TICKS_PER_INCH);
-        rightTarget = -leftTarget;
+        rightTarget =-leftTarget;
         setToEncoderMode();
         setTargetValueMotor();
             runtime.reset();
-            setMotorPower(.5,.5);
+            setMotorPower(.3,.3);
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && (!hasReached())) {
                 // Display it for the driver.
-                telemetry.addData("Path1",  "Running to %7d :%7d", rightTarget, leftTarget);
-                telemetry.addData("Path2",  "Running at %7d :%7d", robot.backLeft.getCurrentPosition(), robot.backRight.getCurrentPosition());
+                telemetry.addData("Right Motor",  "Target %7d: Current Pos %7d: Speed is %7f", rightTarget, robot.backRight.getCurrentPosition(),robot.backRight.getPower());
+                telemetry.addData("Left Motor",  "Target %7d: Current Pos %7d: Speed is %7f", leftTarget, robot.backLeft.getCurrentPosition(),robot.backLeft.getPower());
                 telemetry.update();
 
                 // Allow time for other processes to run.
@@ -207,53 +183,55 @@ public class DriveWithEncoderTemplate extends LinearOpMode{
             }
             setMotorPower(0,0);
             setToWOEncoderMode();
-            sleep(5000);
+            sleep(2000);
         }
     }
-    public  void turnRightWithGyro(int angle, int timeoutS) throws InterruptedException{
-        int initialAngle;
-        if (opModeIsActive()){
-            setToWOEncoderMode();
-            initialAngle = robot.Gyro.getHeading();
-            int targetAngle = initialAngle+angle;
-            setMotorPower(.4, -.4);
-            while (opModeIsActive() && (runtime.seconds() < timeoutS) && robot.Gyro.getHeading()<=targetAngle) {
-                setMotorPower(.4, -.4);
-                telemetry.addData("Update","Initial Angle is " + initialAngle);
-                telemetry.addData("Update","Current Angle is " + robot.Gyro.getHeading());
-                telemetry.addData("Update","Target Angle is " + targetAngle);
-                telemetry.update();
-                // Allow time for other processes to run.
-                idle();
-            }
-            setMotorPower(0,0);
-            sleep(1000);
-        }
-    }
+//    public  void turnRightWithGyro(int angle, int timeoutS) throws InterruptedException{
+//        int initialAngle;
+//        if (opModeIsActive()){
+//            setToWOEncoderMode();
+//            initialAngle = robot.Gyro.getHeading();
+//            int targetAngle = initialAngle+angle;
+//            setMotorPower(.4, -.4);
+//            while (opModeIsActive() && (runtime.seconds() < timeoutS) && robot.Gyro.getHeading()<=targetAngle) {
+//                setMotorPower(.4, -.4);
+//                telemetry.addData("Update","Initial Angle is " + initialAngle);
+//                telemetry.addData("Update","Current Angle is " + robot.Gyro.getHeading());
+//                telemetry.addData("Update","Target Angle is " + targetAngle);
+//                telemetry.update();
+//                // Allow time for other processes to run.
+//                idle();
+//            }
+//            setMotorPower(0,0);
+//            sleep(1000);
+//        }
+//    }
 
     public void setTargetValueMotor() {
-        robot.frontLeft.setTargetPosition(leftTarget);
+//        robot.frontLeft.setTargetPosition(leftTarget);
         robot.backLeft.setTargetPosition(leftTarget);
 
-        robot.frontRight.setTargetPosition(rightTarget);
+//        robot.frontRight.setTargetPosition(rightTarget);
         robot.backRight.setTargetPosition(rightTarget);
     }
 
     public boolean hasReached() {
-        return (Math.abs(robot.frontLeft.getCurrentPosition() - leftTarget) <= TOLERANCE &&
-                Math.abs(robot.backLeft.getCurrentPosition() - leftTarget) <= TOLERANCE &&
-                Math.abs(robot.frontRight.getCurrentPosition() - rightTarget) <= TOLERANCE &&
-                Math.abs(robot.backRight.getCurrentPosition() - rightTarget) <= TOLERANCE);
+//        return (Math.abs(robot.frontLeft.getCurrentPosition() - leftTarget) <= TOLERANCE &&
+//                Math.abs(robot.backLeft.getCurrentPosition() - leftTarget) <= TOLERANCE &&
+//                Math.abs(robot.frontRight.getCurrentPosition() - rightTarget) <= TOLERANCE &&
+//                Math.abs(-robot.backRight.getCurrentPosition() - rightTarget) <= TOLERANCE);
+        return ((Math.abs(robot.backLeft.getCurrentPosition() - leftTarget)<= TOLERANCE) &&
+                (Math.abs((robot.backRight.getCurrentPosition()) - rightTarget)<= TOLERANCE));
     }
 
     public void setMotorPower(double leftPower, double rightPower) {
         clipValues(leftPower, ComponentType.MOTOR);
         clipValues(rightPower, ComponentType.MOTOR);
 
-        robot.frontLeft.setPower(leftPower);
+//        robot.frontLeft.setPower(leftPower);
         robot.backLeft.setPower(leftPower);
 
-        robot.frontRight.setPower(rightPower);
+//        robot.frontRight.setPower(rightPower);
         robot.backRight.setPower(rightPower);
     }
     enum ComponentType {
@@ -266,8 +244,6 @@ public class DriveWithEncoderTemplate extends LinearOpMode{
         double finalval = 0;
         if (type == ComponentType.MOTOR)
             finalval = Range.clip(initialValue, MOTOR_MIN, MOTOR_MAX);
-        if (type == ComponentType.SERVO)
-            finalval = Range.clip(initialValue, SERVO_MIN, SERVO_MAX);
         return finalval;
     }
 }
