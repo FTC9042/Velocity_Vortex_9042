@@ -132,18 +132,12 @@ public class DriveWithEncoderTemplate extends LinearOpMode{
 
 
     //ENCODER MANIPULATION
-    public boolean resetEncoders() {
+    public void resetEncoders() {
         robot.frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robot.backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         robot.frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robot.backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        return ((robot.frontLeft.getCurrentPosition() == 0) &&
-                (robot.backLeft.getCurrentPosition() == 0) &&
-                (robot.frontRight.getCurrentPosition() == 0) &&
-                (robot.backRight.getCurrentPosition() == 0));
-
     }
 
     public void setToEncoderMode() {

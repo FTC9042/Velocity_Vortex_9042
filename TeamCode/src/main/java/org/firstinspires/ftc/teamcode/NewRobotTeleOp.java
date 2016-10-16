@@ -16,22 +16,24 @@ public class NewRobotTeleOp extends OpMode {
     /* Declare OpMode members. */
     private ElapsedTime runtime = new ElapsedTime();
 
-    private DcMotor backLeft = null;
-    private DcMotor backRight = null;
 
     /*
      * Code to run ONCE when the driver hits INIT
      */
+    NewRobot robot = new NewRobot();
     @Override
     public void init() {
         telemetry.addData("Status", "Initialized");
+        robot.init(hardwareMap);
 
-        /* eg: Initialize the hardware variables. Note that the strings used here as parameters
-         * to 'get' must correspond to the names assigned during the robot configuration
-         * step (using the FTC Robot Controller app on the phone).
-         */
-        backLeft  = hardwareMap.dcMotor.get("l2");
-        backRight = hardwareMap.dcMotor.get("r2");
+        robot.backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
     /*
@@ -39,15 +41,6 @@ public class NewRobotTeleOp extends OpMode {
      */
     @Override
     public void init_loop() {
-        if (backLeft.getDirection() == DcMotor.Direction.REVERSE) {
-            backLeft.setDirection(DcMotor.Direction.FORWARD);
-        }
-        if (backRight.getDirection() == DcMotor.Direction.FORWARD) {
-            backRight.setDirection(DcMotor.Direction.REVERSE);
-        }
-        telemetry.addData("Left Encoder", "Value is "+backLeft.getCurrentPosition());
-        telemetry.addData("Right Encoder", "Value is "+backRight.getCurrentPosition());
-        telemetry.update();
     }
 
     /*
@@ -65,13 +58,16 @@ public class NewRobotTeleOp extends OpMode {
     public void loop() {
         telemetry.addData("Status", "Running: " + runtime.toString());
 
-        backLeft.setPower(gamepad1.left_stick_y);
-        backRight.setPower(-gamepad1.right_stick_y);
+        robot.backLeft.setPower(gamepad1.left_stick_y);
+        robot.frontLeft.setPower(-gamepad1.left_stick_y);
+        robot.backRight.setPower(gamepad1.right_stick_y);
+        robot.frontRight.setPower(gamepad1.right_stick_y);
 
-        telemetry.addData("Left Joy", gamepad1.left_stick_y);
-        telemetry.addData("Right Joy", gamepad1.right_stick_y);
-        telemetry.addData("Left Encoder", "Value is "+backLeft.getCurrentPosition());
-        telemetry.addData("Right Encoder", "Value is "+backRight.getCurrentPosition());
+        //Return Encoder Values
+        telemetry.addData("Left Back Encoder", "Value is "+robot.backLeft.getCurrentPosition());
+        telemetry.addData("Left Front Encoder", "Value is "+robot.frontLeft.getCurrentPosition());
+        telemetry.addData("Right Back Encoder", "Value is "+robot.backRight.getCurrentPosition());
+        telemetry.addData("Right Front Encoder", "Value is "+robot.frontRight.getCurrentPosition());
         telemetry.update();
     }
 

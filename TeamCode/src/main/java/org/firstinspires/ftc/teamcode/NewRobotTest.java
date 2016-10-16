@@ -70,74 +70,17 @@ public class NewRobotTest extends LinearOpMode{
 
         robot.init(hardwareMap);
 
-        telemetry.addData("Status", "Resetting Encoders | Left:"+ robot.backLeft.getCurrentPosition()+" Right:"+robot.backRight.getCurrentPosition());    //
         telemetry.update();
-        setDirection();
-//        robot.Gyro.calibrate();
-        resetEncoders();
-        idle();
-//        telemetry.addData("Status","Gyro Sensor Heading is "+robot.Gyro.getHeading());
-//        telemetry.update();
+        robot.setDirection();
+        robot.resetEncoders();
+        telemetry.addData("Status", "Resetting Encoders | Left:"+ robot.backLeft.getCurrentPosition()+" Right:"+robot.backRight.getCurrentPosition());
+        telemetry.update();
+
         waitForStart();
 
-        telemetry.addData("Status", "Forward 48 Inches");    //
+        telemetry.addData("Status", "Forward 48 Inches");
         telemetry.update();
-        runStraight(48, 15);  // S1: Forward 48 Inches with 5 Sec timeout
-        telemetry.addData("Status", " Turning Left 90 degrees");    //
-        telemetry.update();
-        resetEncoders();
-        turnRight(90,15);  // S2: Turn Right 90 degrees with 10 Sec timeout
-        telemetry.addData("Status", " Moving Backwards 12 Inches");    //
-        telemetry.update();
-        resetEncoders();
-        runStraight(-12, 15);  // S3: Reverse 24 Inches with 4 Sec timeout
-        telemetry.addData("Path", "Complete");
-        telemetry.update();
-    }
-
-
-    public void setDirection() {
-        if (robot.backLeft.getDirection() == DcMotor.Direction.REVERSE) {
-            robot.backLeft.setDirection(DcMotor.Direction.FORWARD);
-        }
-        if (robot.backRight.getDirection() == DcMotor.Direction.FORWARD) {
-            robot.backRight.setDirection(DcMotor.Direction.REVERSE);
-        }
-    }
-
-
-    //ENCODER MANIPULATION
-    public boolean resetEncoders() {
-        robot.backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        robot.backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-//        return ((robot.frontLeft.getCurrentPosition() == 0) &&
-//                (robot.backLeft.getCurrentPosition() == 0) &&
-//                (robot.frontRight.getCurrentPosition() == 0) &&
-//                (robot.backRight.getCurrentPosition() == 0));
-//
-        return ((robot.backLeft.getCurrentPosition() == 0) &&
-                (robot.backRight.getCurrentPosition() == 0));
-
-    }
-
-    public void setToEncoderMode() {
-
-//        robot.frontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot.backLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-//        robot.frontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot.backRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-    }
-
-    public void setToWOEncoderMode() {
-
-//        robot.frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        robot.backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-//        robot.frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        robot.backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        runStraight(48, 20);  // S1: Forward 48 Inches with 5 Sec timeout
     }
 
 
@@ -146,104 +89,61 @@ public class NewRobotTest extends LinearOpMode{
         if (opModeIsActive()){
         leftTarget = (int) (distance_in_inches * TICKS_PER_INCH);
         rightTarget = leftTarget;
-        setToEncoderMode();
+        robot.setToEncoderMode();
         setTargetValueMotor();
             runtime.reset();
-            setMotorPower(.3,.3);
-            while (opModeIsActive() && (runtime.seconds() < timeoutS) && (!hasReached())) {
+            robot.setMotorPower(.3,.3);
+            while (opModeIsActive() && (runtime.seconds() < timeoutS)) {
                 // Display it for the driver.
-                telemetry.addData("Right Motor",  "Target %7d: Current Pos %7d: Speed is %7f", rightTarget, robot.backRight.getCurrentPosition(),robot.backRight.getPower());
-                telemetry.addData("Left Motor",  "Target %7d: Current Pos %7d: Speed is %7f", leftTarget, robot.backLeft.getCurrentPosition(),robot.backLeft.getPower());
+                telemetry.addData("Back Right Motor", "Target %7d: Current Pos %7d", robot.backRight.getTargetPosition(), robot.backRight.getCurrentPosition());
+                telemetry.addData("Front Right Motor", "Target %7d: Current Pos %7d", robot.frontRight.getTargetPosition(), robot.frontRight.getCurrentPosition());
+                telemetry.addData("Back Left Motor", "Target %7d: Current Pos %7d", robot.backLeft.getTargetPosition(), robot.backLeft.getCurrentPosition());
+                telemetry.addData("Front Left Motor", "Target %7d: Current Pos %7d", robot.frontLeft.getTargetPosition(), robot.frontLeft.getCurrentPosition());
                 telemetry.update();
 
                 // Allow time for other processes to run.
                 idle();
             }
-            setMotorPower(0,0);
-            setToWOEncoderMode();
-            sleep(2000);
+            robot.setMotorPower(0,0);
+            sleep(20000);
         }
     }
-    public  void turnRight(int angle, int timeoutS) throws InterruptedException{
+    public void turnRight(int angle, int timeoutS) throws InterruptedException{
         if (opModeIsActive()){
         leftTarget = (int)(angle*INCHES_PER_DEGREE*TICKS_PER_INCH);
-        rightTarget =-leftTarget;
-        setToEncoderMode();
+        rightTarget = leftTarget;
+        robot.setToEncoderMode();
         setTargetValueMotor();
             runtime.reset();
-            setMotorPower(.3,.3);
-            while (opModeIsActive() && (runtime.seconds() < timeoutS) && (!hasReached())) {
+            robot.setMotorPower(.3,.3);
+            while (opModeIsActive() && (runtime.seconds() < timeoutS)) {
                 // Display it for the driver.
-                telemetry.addData("Right Motor",  "Target %7d: Current Pos %7d: Speed is %7f", rightTarget, robot.backRight.getCurrentPosition(),robot.backRight.getPower());
+                telemetry.addData("Right Motor",  "Target %7d: Current Pos %7d: Speed is %7f", leftTarget, robot.backRight.getCurrentPosition(),robot.backRight.getPower());
                 telemetry.addData("Left Motor",  "Target %7d: Current Pos %7d: Speed is %7f", leftTarget, robot.backLeft.getCurrentPosition(),robot.backLeft.getPower());
                 telemetry.update();
 
                 // Allow time for other processes to run.
                 idle();
             }
-            setMotorPower(0,0);
-            setToWOEncoderMode();
+            robot.setMotorPower(0,0);
+            robot.setToWOEncoderMode();
             sleep(2000);
         }
     }
-//    public  void turnRightWithGyro(int angle, int timeoutS) throws InterruptedException{
-//        int initialAngle;
-//        if (opModeIsActive()){
-//            setToWOEncoderMode();
-//            initialAngle = robot.Gyro.getHeading();
-//            int targetAngle = initialAngle+angle;
-//            setMotorPower(.4, -.4);
-//            while (opModeIsActive() && (runtime.seconds() < timeoutS) && robot.Gyro.getHeading()<=targetAngle) {
-//                setMotorPower(.4, -.4);
-//                telemetry.addData("Update","Initial Angle is " + initialAngle);
-//                telemetry.addData("Update","Current Angle is " + robot.Gyro.getHeading());
-//                telemetry.addData("Update","Target Angle is " + targetAngle);
-//                telemetry.update();
-//                // Allow time for other processes to run.
-//                idle();
-//            }
-//            setMotorPower(0,0);
-//            sleep(1000);
-//        }
-//    }
 
     public void setTargetValueMotor() {
-//        robot.frontLeft.setTargetPosition(leftTarget);
+        robot.frontLeft.setTargetPosition(leftTarget);
         robot.backLeft.setTargetPosition(leftTarget);
 
-//        robot.frontRight.setTargetPosition(rightTarget);
+        robot.frontRight.setTargetPosition(rightTarget);
         robot.backRight.setTargetPosition(rightTarget);
     }
 
-    public boolean hasReached() {
+//    public boolean hasReached() {
 //        return (Math.abs(robot.frontLeft.getCurrentPosition() - leftTarget) <= TOLERANCE &&
 //                Math.abs(robot.backLeft.getCurrentPosition() - leftTarget) <= TOLERANCE &&
 //                Math.abs(robot.frontRight.getCurrentPosition() - rightTarget) <= TOLERANCE &&
-//                Math.abs(-robot.backRight.getCurrentPosition() - rightTarget) <= TOLERANCE);
-        return ((Math.abs(robot.backLeft.getCurrentPosition() - leftTarget)<= TOLERANCE) &&
-                (Math.abs((robot.backRight.getCurrentPosition()) - rightTarget)<= TOLERANCE));
-    }
+//                Math.abs(robot.backRight.getCurrentPosition() - rightTarget) <= TOLERANCE);
+//    }
 
-    public void setMotorPower(double leftPower, double rightPower) {
-        clipValues(leftPower, ComponentType.MOTOR);
-        clipValues(rightPower, ComponentType.MOTOR);
-
-//        robot.frontLeft.setPower(leftPower);
-        robot.backLeft.setPower(leftPower);
-
-//        robot.frontRight.setPower(rightPower);
-        robot.backRight.setPower(rightPower);
-    }
-    enum ComponentType {
-        NONE,
-        MOTOR,
-        SERVO
-    }
-
-    public double clipValues(double initialValue, ComponentType type) {
-        double finalval = 0;
-        if (type == ComponentType.MOTOR)
-            finalval = Range.clip(initialValue, MOTOR_MIN, MOTOR_MAX);
-        return finalval;
-    }
 }
