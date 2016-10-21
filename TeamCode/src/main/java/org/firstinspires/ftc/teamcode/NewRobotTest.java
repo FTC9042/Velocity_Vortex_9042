@@ -42,7 +42,7 @@ import com.qualcomm.robotcore.util.Range;
 //@Disabled
 public class NewRobotTest extends LinearOpMode{
 
-    NewRobot robot   = new NewRobot();
+    Robot robot   = new Robot();
     private ElapsedTime     runtime = new ElapsedTime();
 
     //encoder targets

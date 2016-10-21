@@ -14,10 +14,10 @@ import com.qualcomm.robotcore.util.ElapsedTime;
  */
 public class RobotHW {
     /* Public OpMode members. */
-    public DcMotor leftMotor1 = null;
-    public DcMotor rightMotor1 = null;
-    public DcMotor leftMotor2 = null;
-    public DcMotor rightMotor2 = null;
+    public DcMotor frontLeft = null;
+    public DcMotor frontRight = null;
+    public DcMotor backLeft = null;
+    public DcMotor backRight = null;
 
     /* Local OpMode members. */
     HardwareMap hwMap = null;
@@ -35,25 +35,25 @@ public class RobotHW {
         // save reference to HW Map
         hwMap = ahwMap;
 
-        leftMotor1 = hwMap.dcMotor.get("l1");
-        rightMotor1 = hwMap.dcMotor.get("r1");
-        leftMotor2 = hwMap.dcMotor.get("l2");
-        rightMotor2 = hwMap.dcMotor.get("r2");
-        leftMotor1.setDirection(DcMotor.Direction.REVERSE);
-        leftMotor2.setDirection(DcMotor.Direction.REVERSE);
+        frontLeft = hwMap.dcMotor.get("l1");
+        frontRight = hwMap.dcMotor.get("r1");
+        backLeft = hwMap.dcMotor.get("l2");
+        backRight = hwMap.dcMotor.get("r2");
+        frontLeft.setDirection(DcMotor.Direction.REVERSE);
+        backLeft.setDirection(DcMotor.Direction.REVERSE);
 
         // Set all motors to zero power
-        leftMotor1.setPower(0);
-        rightMotor1.setPower(0);
-        leftMotor2.setPower(0);
-        rightMotor2.setPower(0);
+        frontLeft.setPower(0);
+        frontRight.setPower(0);
+        backLeft.setPower(0);
+        backRight.setPower(0);
 
         // Set all motors to run without encoders.
         // May want to use RUN_USING_ENCODERS if encoders are installed.
-        leftMotor1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        rightMotor1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        leftMotor2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        rightMotor2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
     /***
@@ -76,20 +76,20 @@ public class RobotHW {
      * Sets all motors to RUN_TO_POSITION mode
      */
     public void setToPositionMode() {
-        leftMotor1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        leftMotor2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        rightMotor1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        rightMotor2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        frontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        frontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
 
     /**
      * Resets all motor positions to 0
      */
     public void resetEncoder() {
-        leftMotor1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        leftMotor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rightMotor1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rightMotor2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         setToPositionMode();
     }
 
@@ -97,20 +97,20 @@ public class RobotHW {
      * Sets all motors to RUN_WITHOUT_ENCODER mode
      */
     public void setToPowerMode() {
-        leftMotor1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        leftMotor2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        rightMotor1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        rightMotor2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
     /**
      * Sets all motors to RUN_USING_ENCODER mode
      */
     public void setToEncoderMode() {
-        leftMotor1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        leftMotor2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rightMotor1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rightMotor2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        frontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        backLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        backRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
     /**
@@ -119,10 +119,10 @@ public class RobotHW {
      * @param runMode runMode to be set
      */
     public void setMotorMode(DcMotor.RunMode runMode) {
-        leftMotor1.setMode(runMode);
-        leftMotor2.setMode(runMode);
-        rightMotor1.setMode(runMode);
-        rightMotor2.setMode(runMode);
+        frontLeft.setMode(runMode);
+        backLeft.setMode(runMode);
+        frontRight.setMode(runMode);
+        backRight.setMode(runMode);
     }
 
     /**
@@ -134,14 +134,14 @@ public class RobotHW {
      * @param right Power of the right motorss
      */
     public void drive(double left, double right) {
-        if (leftMotor1.getMode() == DcMotor.RunMode.RUN_TO_POSITION)
+        if (frontLeft.getMode() == DcMotor.RunMode.RUN_TO_POSITION)
             return; //Stops executing
 
-        leftMotor1.setPower(left);
-        leftMotor2.setPower(left);
+        frontLeft.setPower(left);
+        backLeft.setPower(left);
 
-        rightMotor1.setPower(right);
-        rightMotor2.setPower(right);
+        frontRight.setPower(right);
+        backRight.setPower(right);
     }
 
     /**
@@ -151,14 +151,14 @@ public class RobotHW {
      * @param right Absolute position in ticks of the right motor
      */
     public void setTarget(int left, int right) {
-        if (leftMotor1.getMode() != DcMotor.RunMode.RUN_TO_POSITION)
+        if (frontLeft.getMode() != DcMotor.RunMode.RUN_TO_POSITION)
             return;
 
-        leftMotor1.setTargetPosition(left);
-        leftMotor2.setTargetPosition(left);
+        frontLeft.setTargetPosition(left);
+        backLeft.setTargetPosition(left);
 
-        rightMotor1.setTargetPosition(right);
-        rightMotor2.setTargetPosition(right);
+        frontRight.setTargetPosition(right);
+        backRight.setTargetPosition(right);
     }
 
     /**
@@ -167,11 +167,11 @@ public class RobotHW {
      * @param speed Max speed in ticks per second
      */
     public void setMaxSpeed(int speed) {
-        leftMotor1.setMaxSpeed(speed);
-        leftMotor2.setMaxSpeed(speed);
+        frontLeft.setMaxSpeed(speed);
+        backLeft.setMaxSpeed(speed);
 
-        rightMotor1.setMaxSpeed(speed);
-        rightMotor2.setMaxSpeed(speed);
+        frontRight.setMaxSpeed(speed);
+        backRight.setMaxSpeed(speed);
     }
 
     /**
@@ -179,26 +179,26 @@ public class RobotHW {
      * @param zeroPowerBehavior The behavior of motors with 0 as speed.
      */
     public void setZeroPowerBehavior(DcMotor.ZeroPowerBehavior zeroPowerBehavior){
-        leftMotor1.setZeroPowerBehavior(zeroPowerBehavior);
-        leftMotor2.setZeroPowerBehavior(zeroPowerBehavior);
+        frontLeft.setZeroPowerBehavior(zeroPowerBehavior);
+        backLeft.setZeroPowerBehavior(zeroPowerBehavior);
 
-        rightMotor1.setZeroPowerBehavior(zeroPowerBehavior);
-        rightMotor2.setZeroPowerBehavior(zeroPowerBehavior);
+        frontRight.setZeroPowerBehavior(zeroPowerBehavior);
+        backRight.setZeroPowerBehavior(zeroPowerBehavior);
     }
 
-    public DcMotor getLeftMotor1() {
-        return leftMotor1;
+    public DcMotor getfrontLeft() {
+        return frontLeft;
     }
 
-    public DcMotor getRightMotor1() {
-        return rightMotor1;
+    public DcMotor getfrontRight() {
+        return frontRight;
     }
 
-    public DcMotor getLeftMotor2() {
-        return leftMotor2;
+    public DcMotor getbackLeft() {
+        return backLeft;
     }
 
-    public DcMotor getRightMotor2() {
-        return rightMotor2;
+    public DcMotor getbackRight() {
+        return backRight;
     }
 }

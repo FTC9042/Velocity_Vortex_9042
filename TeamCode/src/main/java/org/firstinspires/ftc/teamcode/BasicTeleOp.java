@@ -12,7 +12,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @TeleOp(name="TeleOp", group="Iterative Opmode")  // @Autonomous(...) is the other common choice
-public class NewRobotTeleOp extends OpMode {
+public class BasicTeleOp extends OpMode {
     /* Declare OpMode members. */
     private ElapsedTime runtime = new ElapsedTime();
 
@@ -20,7 +20,7 @@ public class NewRobotTeleOp extends OpMode {
     /*
      * Code to run ONCE when the driver hits INIT
      */
-    NewRobot robot = new NewRobot();
+    Robot robot = new Robot();
     @Override
     public void init() {
         telemetry.addData("Status", "Initialized");

@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-public class NewRobot
+public class Robot
 {
     //driving motors
     DcMotor backLeft, frontLeft, frontRight, backRight;
@@ -20,7 +20,7 @@ public class NewRobot
     private ElapsedTime period  = new ElapsedTime();
 
     /* Constructor */
-    public NewRobot() {
+    public Robot() {
     }
 
     /* Initialize standard Hardware interfaces */
@@ -40,6 +40,7 @@ public class NewRobot
         frontRight.setPower(0);
         frontLeft.setPower(0);
 
+        setToWOEncoderMode();
     }
 
     /***
@@ -62,32 +63,33 @@ public class NewRobot
         // Reset the cycle clock for the next pass.
         period.reset();
     }
+
+    /**
+     * Sets all motors to RUN_TO_POSITION mode
+     */
     public void setToEncoderMode() {
-
-        frontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        backLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        frontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        backRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        setMotorMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
 
+    /**
+     * Sets all motors to RUN_WITHOUT_ENCODER mode
+     */
     public void setToWOEncoderMode() {
-
-        frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-        frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        setMotorMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 
-    //ENCODER MANIPULATION
+    /**
+     * Sets all motors to RUN_USING_ENCODER mode
+     */
     public void resetEncoders() {
-        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        DcMotor.RunMode prev = backLeft.getMode();
+        setMotorMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        setMotorMode(prev);
     }
 
+    /**
+     * Sets the direction config of motors
+     */
     public void setDirection() {
         backLeft.setDirection(DcMotor.Direction.FORWARD);
         backRight.setDirection(DcMotor.Direction.REVERSE);
@@ -95,14 +97,45 @@ public class NewRobot
         frontRight.setDirection(DcMotor.Direction.REVERSE);
     }
 
+    /**
+     * Sets all motors to this runMode
+     *
+     * @param runMode runMode to be set
+     */
+    public void setMotorMode(DcMotor.RunMode runMode) {
+        backLeft.setMode(runMode);
+        backRight.setMode(runMode);
+        frontRight.setMode(runMode);
+        frontLeft.setMode(runMode);
+    }
 
+    /**
+     * Drives the motors with the specified power levels
+     * <p>
+     * This method will not execute if the motors are in RUN_TO_POSITION mode
+     *
+     * @param leftpower  Power of the left motors
+     * @param rightpower Power of the right motorss
+     */
     public void setMotorPower(double leftpower, double rightpower){
         backRight.setPower(rightpower);
         frontRight.setPower(rightpower);
 
         backLeft.setPower(leftpower);
         frontLeft.setPower(leftpower);
+    }
 
+    /**
+     * Sets the maximum speed of the motors in RUN_TO_POSITION mode
+     *
+     * @param speed Max speed in ticks per second
+     */
+    public void setMaxSpeed(int speed) {
+        backRight.setMaxSpeed(speed);
+        backLeft.setMaxSpeed(speed);
+
+        frontLeft.setMaxSpeed(speed);
+        frontRight.setMaxSpeed(speed);
     }
 
 }
