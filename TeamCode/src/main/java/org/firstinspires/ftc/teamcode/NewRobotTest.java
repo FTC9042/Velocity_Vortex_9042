@@ -60,7 +60,7 @@ public class NewRobotTest extends LinearOpMode{
 
     //ENCODER CONSTANTS
     private final double CIRCUMFERENCE_INCHES = 4 * Math.PI,
-            TICKS_PER_ROTATION = 1200 / 1.05,
+            TICKS_PER_ROTATION = 1200 / 0.8522,
             TICKS_PER_INCH = TICKS_PER_ROTATION / CIRCUMFERENCE_INCHES,
             TOLERANCE = 40,
             ROBOT_WIDTH = 14.5;
@@ -82,10 +82,10 @@ public class NewRobotTest extends LinearOpMode{
 
         telemetry.addData("Status", "Forward 48 Inches");
         telemetry.update();
-        runStraight(48, 10);  // S1: Forward 48 Inches with 5 Sec timeout
-        telemetry.addData("Status", "Turning Right 90 degrees");
-        telemetry.update();
-        turnRight(90,10);
+        runStraight(70, 10);  // S1: Forward 48 Inches with 5 Sec timeout
+//        telemetry.addData("Status", "Turning Right 90 degrees");
+//        telemetry.update();
+//        turnRight(90,10);
     }
 
 
