@@ -38,9 +38,9 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
-@Autonomous(name="New Robot Drive", group="Tests")
+@Autonomous(name="Bump Ball Auton", group="Autons")
 //@Disabled
-public class NewRobotTest extends LinearOpMode{
+public class BumpBallAuton extends LinearOpMode{
 
     Robot robot   = new Robot();
     private ElapsedTime     runtime = new ElapsedTime();
@@ -50,20 +50,15 @@ public class NewRobotTest extends LinearOpMode{
             leftTarget;
 
 
-    //MOTOR RANGES
-    private final double MOTOR_MAX = 1,
-            MOTOR_MIN = -1;
     private final double INCHES_PER_DEGREE = Math.PI/20;
 
 
-    protected boolean on = true;
 
     //ENCODER CONSTANTS
     private final double CIRCUMFERENCE_INCHES = 4 * Math.PI,
             TICKS_PER_ROTATION = 1200 / 1.05,
             TICKS_PER_INCH = TICKS_PER_ROTATION / CIRCUMFERENCE_INCHES,
-            TOLERANCE = 40,
-            ROBOT_WIDTH = 14.5;
+            TOLERANCE = 40;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -79,23 +74,31 @@ public class NewRobotTest extends LinearOpMode{
 
         waitForStart();
 
-
-        telemetry.addData("Status", "Forward 48 Inches");
+        telemetry.addData("Status", "Forward 40 Inches");
         telemetry.update();
-        runStraight(48, 10);  // S1: Forward 48 Inches with 5 Sec timeout
-        telemetry.addData("Status", "Turning Right 90 degrees");
+        runStraight(40, 10);  // S1: Forward 48 Inches with 5 Sec timeout
+        telemetry.addData("Status", "Turning Right 45 degrees");
         telemetry.update();
-        turnRight(90,10);
+        turnRight(45,10);
+        telemetry.addData("Status", "Forward 40 Inches to bump ball");
+        telemetry.update();
+        runStraight(40, 10);  // S1: Forward 48 Inches with 5 Sec timeout
+        telemetry.addData("Status", "Turning Right 45 degrees");
+        telemetry.update();
+        turnRight(45,10);
+        telemetry.addData("Status", "Forward 50 Inches");
+        telemetry.update();
+        runStraight(50, 10);  // S1: Forward 48 Inches with 5 Sec timeout
     }
 
 
     //ENCODER BASED MOVEMENT
     public void runStraight(double distance_in_inches, int timeoutS) throws InterruptedException{
         if (opModeIsActive()){
-        leftTarget = (int) (distance_in_inches * TICKS_PER_INCH);
-        rightTarget = leftTarget;
-        robot.setToEncoderMode();
-        setTargetValueMotor();
+            leftTarget = (int) (distance_in_inches * TICKS_PER_INCH);
+            rightTarget = leftTarget;
+            robot.setToEncoderMode();
+            setTargetValueMotor();
             runtime.reset();
             robot.setMotorPower(.3,.3);
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && !hasReached()) {
@@ -109,36 +112,11 @@ public class NewRobotTest extends LinearOpMode{
                 // Allow time for other processes to run.
                 idle();
             }
-            robot.setMotorPower(0,0);
             robot.resetEncoders();
-            sleep(1000);
+            robot.setMotorPower(0,0);
+            sleep(500);
         }
     }
-
-    //Turning with Encoders
-//    public void turnRight(int angle, int timeoutS) throws InterruptedException{
-//        if (opModeIsActive()){
-//        leftTarget = (int)(angle*INCHES_PER_DEGREE*TICKS_PER_INCH);
-//        rightTarget = -leftTarget;
-//        robot.setToEncoderMode();
-//        setTargetValueMotor();
-//            runtime.reset();
-//            robot.setMotorPower(.3,.3);
-//            while (opModeIsActive() && (runtime.seconds() < timeoutS) && !hasReached()) {
-//                // Display it for the driver.
-//                telemetry.addData("Right Motor", "Target %7d: Current Pos %7d: Speed is %7f", leftTarget, robot.backRight.getCurrentPosition(), robot.backRight.getPower());
-//                telemetry.addData("Left Motor", "Target %7d: Current Pos %7d: Speed is %7f", leftTarget, robot.backLeft.getCurrentPosition(), robot.backLeft.getPower());
-//                telemetry.update();
-//
-//                // Allow time for other processes to run.
-//                idle();
-//            }
-//            robot.setMotorPower(0,0);
-//            robot.resetEncoders();
-//            robot.setToWOEncoderMode();
-//            sleep(1000);
-//        }
-//    }
 
     //Turning With Gyro's
     public void turnRight(int angle, int timeoutS) throws InterruptedException{

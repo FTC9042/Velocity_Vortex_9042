@@ -13,7 +13,7 @@ public class Robot
     //driving motors
     DcMotor backLeft, frontLeft, frontRight, backRight;
 
-    GyroSensor Gyro;
+    GyroSensor gyro;
 
     /* Local OpMode members. */
     HardwareMap hardwareMap  = null;
@@ -34,6 +34,8 @@ public class Robot
         //right drive
         backRight = hardwareMap.dcMotor.get("r2");
         frontRight = hardwareMap.dcMotor.get("r1");
+
+        gyro = hardwareMap.gyroSensor.get("gyro");
 
         backLeft.setPower(0);
         backRight.setPower(0);
@@ -72,11 +74,15 @@ public class Robot
     }
 
     /**
+     * Resets the heading of the Gyro Sensor by calibrating
+     */
+
+    public void resetGyro()  { gyro.calibrate(); }
+
+    /**
      * Sets all motors to RUN_WITHOUT_ENCODER mode
      */
-    public void setToWOEncoderMode() {
-        setMotorMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-    }
+    public void setToWOEncoderMode() {setMotorMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER); }
 
     /**
      * Sets all motors to RUN_USING_ENCODER mode

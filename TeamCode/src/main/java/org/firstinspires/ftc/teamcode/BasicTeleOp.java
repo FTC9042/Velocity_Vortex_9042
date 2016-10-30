@@ -26,14 +26,10 @@ public class BasicTeleOp extends OpMode {
         telemetry.addData("Status", "Initialized");
         robot.init(hardwareMap);
 
-        robot.backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        robot.backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        robot.frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        robot.frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        robot.resetGyro();
+        robot.resetEncoders();
+        robot.setToWOEncoderMode();
+        robot.setDirection();
     }
 
     /*
@@ -58,16 +54,17 @@ public class BasicTeleOp extends OpMode {
     public void loop() {
         telemetry.addData("Status", "Running: " + runtime.toString());
 
-        robot.backLeft.setPower(gamepad1.left_stick_y);
+        robot.backLeft.setPower(-gamepad1.left_stick_y);
         robot.frontLeft.setPower(-gamepad1.left_stick_y);
-        robot.backRight.setPower(gamepad1.right_stick_y);
-        robot.frontRight.setPower(gamepad1.right_stick_y);
+        robot.backRight.setPower(-gamepad1.right_stick_y);
+        robot.frontRight.setPower(-gamepad1.right_stick_y);
 
         //Return Encoder Values
         telemetry.addData("Left Back Encoder", "Value is "+robot.backLeft.getCurrentPosition());
         telemetry.addData("Left Front Encoder", "Value is "+robot.frontLeft.getCurrentPosition());
         telemetry.addData("Right Back Encoder", "Value is "+robot.backRight.getCurrentPosition());
         telemetry.addData("Right Front Encoder", "Value is "+robot.frontRight.getCurrentPosition());
+        telemetry.addData("Robot Angle","The robot is facing "+robot.gyro.getHeading());
         telemetry.update();
     }
 
