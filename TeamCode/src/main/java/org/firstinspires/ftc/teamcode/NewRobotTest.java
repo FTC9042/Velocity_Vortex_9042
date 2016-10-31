@@ -45,30 +45,11 @@ public class NewRobotTest extends LinearOpMode{
     Robot robot   = new Robot();
     private ElapsedTime     runtime = new ElapsedTime();
 
-    //encoder targets
-    private int rightTarget,
-            leftTarget;
-
-
-    //MOTOR RANGES
-    private final double MOTOR_MAX = 1,
-            MOTOR_MIN = -1;
-    private final double INCHES_PER_DEGREE = Math.PI/20;
-
-
-    protected boolean on = true;
-
-    //ENCODER CONSTANTS
-    private final double CIRCUMFERENCE_INCHES = 4 * Math.PI,
-            TICKS_PER_ROTATION = 1200 / 0.8522,
-            TICKS_PER_INCH = TICKS_PER_ROTATION / CIRCUMFERENCE_INCHES,
-            TOLERANCE = 40,
-            ROBOT_WIDTH = 14.5;
 
     @Override
     public void runOpMode() throws InterruptedException {
 
-        robot.init(hardwareMap);
+        robot.init(hardwareMap, telemetry);
 
         telemetry.update();
         robot.resetGyro();
@@ -82,38 +63,17 @@ public class NewRobotTest extends LinearOpMode{
 
         telemetry.addData("Status", "Forward 48 Inches");
         telemetry.update();
-        runStraight(70, 10);  // S1: Forward 48 Inches with 5 Sec timeout
+        robot.setDistance(12);
+        while(opModeIsActive()&&robot.runStraight()) {  // S1: Forward 70 inches
+            idle();     //Yield resources
+        }
 //        telemetry.addData("Status", "Turning Right 90 degrees");
 //        telemetry.update();
 //        turnRight(90,10);
     }
 
 
-    //ENCODER BASED MOVEMENT
-    public void runStraight(double distance_in_inches, int timeoutS) throws InterruptedException{
-        if (opModeIsActive()){
-        leftTarget = (int) (distance_in_inches * TICKS_PER_INCH);
-        rightTarget = leftTarget;
-        robot.setToEncoderMode();
-        setTargetValueMotor();
-            runtime.reset();
-            robot.setMotorPower(.3,.3);
-            while (opModeIsActive() && (runtime.seconds() < timeoutS) && !hasReached()) {
-                // Display it for the driver.
-                telemetry.addData("Back Right Motor", "Target %7d: Current Pos %7d", robot.backRight.getTargetPosition(), robot.backRight.getCurrentPosition());
-                telemetry.addData("Front Right Motor", "Target %7d: Current Pos %7d", robot.frontRight.getTargetPosition(), robot.frontRight.getCurrentPosition());
-                telemetry.addData("Back Left Motor", "Target %7d: Current Pos %7d", robot.backLeft.getTargetPosition(), robot.backLeft.getCurrentPosition());
-                telemetry.addData("Front Left Motor", "Target %7d: Current Pos %7d", robot.frontLeft.getTargetPosition(), robot.frontLeft.getCurrentPosition());
-                telemetry.update();
 
-                // Allow time for other processes to run.
-                idle();
-            }
-            robot.setMotorPower(0,0);
-            robot.resetEncoders();
-            sleep(1000);
-        }
-    }
 
     //Turning with Encoders
 //    public void turnRight(int angle, int timeoutS) throws InterruptedException{
@@ -161,19 +121,6 @@ public class NewRobotTest extends LinearOpMode{
         }
     }
 
-    public void setTargetValueMotor() {
-        robot.frontLeft.setTargetPosition(leftTarget);
-        robot.backLeft.setTargetPosition(leftTarget);
 
-        robot.frontRight.setTargetPosition(rightTarget);
-        robot.backRight.setTargetPosition(rightTarget);
-    }
-
-    public boolean hasReached() {
-        return (Math.abs(robot.frontLeft.getCurrentPosition() - leftTarget) <= TOLERANCE &&
-                Math.abs(robot.backLeft.getCurrentPosition() - leftTarget) <= TOLERANCE &&
-                Math.abs(robot.frontRight.getCurrentPosition() - rightTarget) <= TOLERANCE &&
-                Math.abs(robot.backRight.getCurrentPosition() - rightTarget) <= TOLERANCE);
-    }
 
 }
