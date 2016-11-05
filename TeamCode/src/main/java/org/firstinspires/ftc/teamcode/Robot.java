@@ -16,7 +16,7 @@ public class Robot
 
     GyroSensor gyro;
 
-//    ColorSensor color;
+    ColorSensor color;
 
     /* Local OpMode members. */
     HardwareMap hardwareMap  = null;
@@ -40,7 +40,7 @@ public class Robot
 
         gyro = hardwareMap.gyroSensor.get("gyro");
 
-//        color = hardwareMap.colorSensor.get("color");
+        color = hardwareMap.colorSensor.get("color");
 
         backLeft.setPower(0);
         backRight.setPower(0);

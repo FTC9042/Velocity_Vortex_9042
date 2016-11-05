@@ -81,13 +81,9 @@ public class RedPosOneParkMiddle extends LinearOpMode{
 
         waitForStart();
 
-//        telemetry.addData("Status", "Waiting 10 seconds");
-//        telemetry.update();
-//        sleep(10000);
-
-        telemetry.addData("Status", "Going Straight 58 inches");
+        telemetry.addData("Status", "Going Straight 64 inches");
         telemetry.update();
-        runStraight(60, 10);
+        runStraight(64, 10);
     }
 
 

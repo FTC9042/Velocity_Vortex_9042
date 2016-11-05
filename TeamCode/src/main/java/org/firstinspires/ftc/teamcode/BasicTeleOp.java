@@ -30,6 +30,8 @@ public class BasicTeleOp extends OpMode {
         robot.resetEncoders();
         robot.setToWOEncoderMode();
         robot.setDirection();
+        robot.color.enableLed(false);
+
     }
 
     /*
@@ -65,6 +67,7 @@ public class BasicTeleOp extends OpMode {
         telemetry.addData("Right Back Encoder", "Value is "+robot.backRight.getCurrentPosition());
         telemetry.addData("Right Front Encoder", "Value is "+robot.frontRight.getCurrentPosition());
         telemetry.addData("Robot Angle","The robot is facing "+robot.gyro.getHeading());
+        telemetry.addData("Colors", "Red %d Green %d Blue %d", robot.color.red(), robot.color.green(), robot.color.blue());
         telemetry.update();
     }
 
