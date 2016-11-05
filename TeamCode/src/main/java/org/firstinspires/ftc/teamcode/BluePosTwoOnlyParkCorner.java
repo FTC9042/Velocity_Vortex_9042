@@ -34,13 +34,14 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
 
-@Autonomous(name="Bump Ball Auton", group="Autons")
+//Back left wheel is on the first crack away from the corner vortex on driver side
+//Flush against wall
+
+@Autonomous(name="Blue Pos2: Only Park Corner", group="Blue Position 2")
 //@Disabled
-public class BumpBallAuton extends LinearOpMode{
+public class BluePosTwoOnlyParkCorner extends LinearOpMode{
 
     Robot robot   = new Robot();
     private ElapsedTime     runtime = new ElapsedTime();
@@ -50,15 +51,20 @@ public class BumpBallAuton extends LinearOpMode{
             leftTarget;
 
 
+    //MOTOR RANGES
+    private final double MOTOR_MAX = 1,
+            MOTOR_MIN = -1;
     private final double INCHES_PER_DEGREE = Math.PI/20;
 
 
+    protected boolean on = true;
 
     //ENCODER CONSTANTS
     private final double CIRCUMFERENCE_INCHES = 4 * Math.PI,
-            TICKS_PER_ROTATION = 1200 / 1.05,
+            TICKS_PER_ROTATION = 1200 / 0.8522,
             TICKS_PER_INCH = TICKS_PER_ROTATION / CIRCUMFERENCE_INCHES,
-            TOLERANCE = 40;
+            TOLERANCE = 40,
+            ROBOT_WIDTH = 14.5;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -74,49 +80,46 @@ public class BumpBallAuton extends LinearOpMode{
 
         waitForStart();
 
-        telemetry.addData("Status", "Forward 40 Inches");
+        telemetry.addData("Status", "Forward 48 Inches");
         telemetry.update();
-        runStraight(40, 10);  // S1: Forward 48 Inches with 5 Sec timeout
-        telemetry.addData("Status", "Turning Right 45 degrees");
+        runStraight(30, 10);
+        telemetry.addData("Status", "Forward 30 Inches");
         telemetry.update();
-        turnRight(45,10);
-        telemetry.addData("Status", "Forward 40 Inches to bump ball");
+        turnLeft(60, 10);
+        telemetry.addData("Status", "Forward 45 Inches");
         telemetry.update();
-        runStraight(40, 10);  // S1: Forward 48 Inches with 5 Sec timeout
-        telemetry.addData("Status", "Turning Right 45 degrees");
+        runStraight(-30,10);
+        telemetry.addData("Status", "backwards 20 Inches");
         telemetry.update();
-        turnRight(45,10);
-        telemetry.addData("Status", "Forward 50 Inches");
-        telemetry.update();
-        runStraight(50, 10);  // S1: Forward 48 Inches with 5 Sec timeout
     }
 
 
     //ENCODER BASED MOVEMENT
     public void runStraight(double distance_in_inches, int timeoutS) throws InterruptedException{
         if (opModeIsActive()){
-            leftTarget = (int) (distance_in_inches * TICKS_PER_INCH);
-            rightTarget = leftTarget;
-            robot.setToEncoderMode();
-            setTargetValueMotor();
+        leftTarget = (int) (distance_in_inches * TICKS_PER_INCH);
+        rightTarget = leftTarget;
+        robot.setToEncoderMode();
+        setTargetValueMotor();
             runtime.reset();
-            robot.setMotorPower(.3,.3);
+            robot.setMotorPower(.4,.4);
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && !hasReached()) {
                 // Display it for the driver.
                 telemetry.addData("Back Right Motor", "Target %7d: Current Pos %7d", robot.backRight.getTargetPosition(), robot.backRight.getCurrentPosition());
                 telemetry.addData("Front Right Motor", "Target %7d: Current Pos %7d", robot.frontRight.getTargetPosition(), robot.frontRight.getCurrentPosition());
                 telemetry.addData("Back Left Motor", "Target %7d: Current Pos %7d", robot.backLeft.getTargetPosition(), robot.backLeft.getCurrentPosition());
                 telemetry.addData("Front Left Motor", "Target %7d: Current Pos %7d", robot.frontLeft.getTargetPosition(), robot.frontLeft.getCurrentPosition());
+                telemetry.addData("Gyro", "Robot is facing %d",robot.gyro.getHeading());
                 telemetry.update();
 
                 // Allow time for other processes to run.
                 idle();
             }
-            robot.resetEncoders();
             robot.setMotorPower(0,0);
-            sleep(500);
+            robot.resetEncoders();
         }
     }
+
 
     //Turning With Gyro's
     public void turnRight(int angle, int timeoutS) throws InterruptedException{
@@ -124,7 +127,8 @@ public class BumpBallAuton extends LinearOpMode{
             robot.setToWOEncoderMode();
             runtime.reset();
             robot.setMotorPower(.1,-.1);
-            while (opModeIsActive() && (runtime.seconds() < timeoutS) && robot.gyro.getHeading()<=angle-3) {
+            int targetAngle = robot.gyro.getHeading()+angle;
+            while (opModeIsActive() && (runtime.seconds() < timeoutS) && robot.gyro.getHeading()<=targetAngle-3) {
                 // Display it for the driver.
                 telemetry.addData("Gyro", "Target is %d and Current is %d",angle, robot.gyro.getHeading() );
                 telemetry.update();
@@ -132,10 +136,39 @@ public class BumpBallAuton extends LinearOpMode{
                 // Allow time for other processes to run.
                 idle();
             }
-            robot.resetGyro();
             robot.setMotorPower(0,0);
             robot.resetEncoders();
-            sleep(500);
+        }
+    }
+
+    //Turning With Gyro's
+    public void turnLeft(int angle, int timeoutS) throws InterruptedException{
+        if (opModeIsActive()){
+            robot.setToWOEncoderMode();
+            runtime.reset();
+            robot.setMotorPower(-.1,.1);
+            int currentAngle;
+            int targetAngle = robot.gyro.getHeading()-angle;
+            if (targetAngle<0){
+                targetAngle = targetAngle+360;
+            }
+            if (robot.gyro.getHeading()<=5) {
+                currentAngle = robot.gyro.getHeading() + 360;
+            }
+            else{
+                currentAngle = robot.gyro.getHeading();
+            }
+            while (opModeIsActive() && (runtime.seconds() < timeoutS) && currentAngle-targetAngle>=3) {
+                // Display it for the driver.
+                if (robot.gyro.getHeading() <= 5) {
+                    currentAngle = robot.gyro.getHeading() + 360;
+                } else {
+                    currentAngle = robot.gyro.getHeading();
+                }
+            }
+            robot.setMotorPower(0,0);
+            robot.resetEncoders();
+
         }
     }
 

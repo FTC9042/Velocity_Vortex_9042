@@ -34,13 +34,14 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
 
-@Autonomous(name="New Robot Drive", group="Tests")
+//Back left wheel is on the first crack away from the corner vortex on driver side
+//Flush against wall
+
+@Autonomous(name="Red Pos2: Only Park Corner", group="Red Position 2")
 //@Disabled
-public class NewRobotTest extends LinearOpMode{
+public class RedPosTwoOnlyParkCorner extends LinearOpMode{
 
     Robot robot   = new Robot();
     private ElapsedTime     runtime = new ElapsedTime();
@@ -48,6 +49,7 @@ public class NewRobotTest extends LinearOpMode{
     //encoder targets
     private int rightTarget,
             leftTarget;
+
 
     //MOTOR RANGES
     private final double MOTOR_MAX = 1,
@@ -78,12 +80,17 @@ public class NewRobotTest extends LinearOpMode{
 
         waitForStart();
 
-
-//        telemetry.addData("Status", "Forward 48 Inches");
-//        telemetry.update();
-        //runStraight(distance, time);
-        //turnRight(angle, time);
-        //turnLeft(angle, time);
+        telemetry.addData("Status", "Forward 48 Inches");
+        telemetry.update();
+        runStraight(30, 10);
+        telemetry.addData("Status", "Forward 30 Inches");
+        telemetry.update();
+        turnRight(60, 10);
+        telemetry.addData("Status", "Forward 45 Inches");
+        telemetry.update();
+        runStraight(-30,10);
+        telemetry.addData("Status", "backwards 20 Inches");
+        telemetry.update();
     }
 
 
@@ -95,13 +102,14 @@ public class NewRobotTest extends LinearOpMode{
         robot.setToEncoderMode();
         setTargetValueMotor();
             runtime.reset();
-            robot.setMotorPower(.3,.3);
+            robot.setMotorPower(.4,.4);
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && !hasReached()) {
                 // Display it for the driver.
                 telemetry.addData("Back Right Motor", "Target %7d: Current Pos %7d", robot.backRight.getTargetPosition(), robot.backRight.getCurrentPosition());
                 telemetry.addData("Front Right Motor", "Target %7d: Current Pos %7d", robot.frontRight.getTargetPosition(), robot.frontRight.getCurrentPosition());
                 telemetry.addData("Back Left Motor", "Target %7d: Current Pos %7d", robot.backLeft.getTargetPosition(), robot.backLeft.getCurrentPosition());
                 telemetry.addData("Front Left Motor", "Target %7d: Current Pos %7d", robot.frontLeft.getTargetPosition(), robot.frontLeft.getCurrentPosition());
+                telemetry.addData("Gyro", "Robot is facing %d",robot.gyro.getHeading());
                 telemetry.update();
 
                 // Allow time for other processes to run.
@@ -109,9 +117,9 @@ public class NewRobotTest extends LinearOpMode{
             }
             robot.setMotorPower(0,0);
             robot.resetEncoders();
-            sleep(1000);
         }
     }
+
 
     //Turning With Gyro's
     public void turnRight(int angle, int timeoutS) throws InterruptedException{

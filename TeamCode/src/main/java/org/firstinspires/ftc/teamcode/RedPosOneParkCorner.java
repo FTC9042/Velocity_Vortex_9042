@@ -34,13 +34,15 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
 
-@Autonomous(name="New Robot Drive", group="Tests")
+/*Position one is with the back left wheel touching the wall at the first crack between two mats
+Parallel to the midway line
+*/
+
+@Autonomous(name="Red Pos1: Park Partial Corner", group="Red Position 1")
 //@Disabled
-public class NewRobotTest extends LinearOpMode{
+public class RedPosOneParkCorner extends LinearOpMode{
 
     Robot robot   = new Robot();
     private ElapsedTime     runtime = new ElapsedTime();
@@ -48,6 +50,7 @@ public class NewRobotTest extends LinearOpMode{
     //encoder targets
     private int rightTarget,
             leftTarget;
+
 
     //MOTOR RANGES
     private final double MOTOR_MAX = 1,
@@ -74,16 +77,21 @@ public class NewRobotTest extends LinearOpMode{
         robot.setDirection();
         robot.resetEncoders();
         telemetry.addData("Status", "Resetting Encoders | Left:"+ robot.backLeft.getCurrentPosition()+" Right:"+robot.backRight.getCurrentPosition());
+        telemetry.addData("Status", "Gyro Resetting"+ robot.gyro.getHeading());
         telemetry.update();
 
         waitForStart();
 
+        telemetry.addData("Status", "Forward 62 Inches");
+        telemetry.update();
+        runStraight(62, 10);
+        telemetry.addData("Status", "Turn left 70 degrees");
+        telemetry.update();
+        turnLeft(60, 10);
+        telemetry.addData("Status", "Forward 65 Inches");
+        telemetry.update();
+        runStraight(50,10);
 
-//        telemetry.addData("Status", "Forward 48 Inches");
-//        telemetry.update();
-        //runStraight(distance, time);
-        //turnRight(angle, time);
-        //turnLeft(angle, time);
     }
 
 
@@ -95,13 +103,14 @@ public class NewRobotTest extends LinearOpMode{
         robot.setToEncoderMode();
         setTargetValueMotor();
             runtime.reset();
-            robot.setMotorPower(.3,.3);
+            robot.setMotorPower(.4,.4);
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && !hasReached()) {
                 // Display it for the driver.
                 telemetry.addData("Back Right Motor", "Target %7d: Current Pos %7d", robot.backRight.getTargetPosition(), robot.backRight.getCurrentPosition());
                 telemetry.addData("Front Right Motor", "Target %7d: Current Pos %7d", robot.frontRight.getTargetPosition(), robot.frontRight.getCurrentPosition());
                 telemetry.addData("Back Left Motor", "Target %7d: Current Pos %7d", robot.backLeft.getTargetPosition(), robot.backLeft.getCurrentPosition());
                 telemetry.addData("Front Left Motor", "Target %7d: Current Pos %7d", robot.frontLeft.getTargetPosition(), robot.frontLeft.getCurrentPosition());
+                telemetry.addData("Gyro", "Robot is facing %d",robot.gyro.getHeading());
                 telemetry.update();
 
                 // Allow time for other processes to run.
@@ -109,7 +118,6 @@ public class NewRobotTest extends LinearOpMode{
             }
             robot.setMotorPower(0,0);
             robot.resetEncoders();
-            sleep(1000);
         }
     }
 

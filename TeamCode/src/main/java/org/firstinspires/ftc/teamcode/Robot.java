@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.GyroSensor;
@@ -14,6 +15,8 @@ public class Robot
     DcMotor backLeft, frontLeft, frontRight, backRight;
 
     GyroSensor gyro;
+
+//    ColorSensor color;
 
     /* Local OpMode members. */
     HardwareMap hardwareMap  = null;
@@ -36,6 +39,8 @@ public class Robot
         frontRight = hardwareMap.dcMotor.get("r1");
 
         gyro = hardwareMap.gyroSensor.get("gyro");
+
+//        color = hardwareMap.colorSensor.get("color");
 
         backLeft.setPower(0);
         backRight.setPower(0);
