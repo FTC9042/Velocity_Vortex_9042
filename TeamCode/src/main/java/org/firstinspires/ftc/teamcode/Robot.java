@@ -14,6 +14,9 @@ public class Robot
     //driving motors
     DcMotor backLeft, frontLeft, frontRight, backRight;
 
+    //Manipulator Motors
+    DcMotor roller;
+
     GyroSensor gyro;
 
     ColorSensor color;
@@ -37,6 +40,9 @@ public class Robot
         //right drive
         backRight = hardwareMap.dcMotor.get("r2");
         frontRight = hardwareMap.dcMotor.get("r1");
+
+        //Manipulators
+        roller = hardwareMap.dcMotor.get("intake");
 
         gyro = hardwareMap.gyroSensor.get("gyro");
 
@@ -106,6 +112,7 @@ public class Robot
         backRight.setDirection(DcMotor.Direction.REVERSE);
         frontLeft.setDirection(DcMotor.Direction.FORWARD);
         frontRight.setDirection(DcMotor.Direction.REVERSE);
+        roller.setDirection(DcMotor.Direction.FORWARD);
     }
 
     /**

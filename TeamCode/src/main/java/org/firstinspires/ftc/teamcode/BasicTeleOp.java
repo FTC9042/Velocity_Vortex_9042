@@ -60,6 +60,16 @@ public class BasicTeleOp extends OpMode {
         robot.frontLeft.setPower(-gamepad1.left_stick_y);
         robot.backRight.setPower(-gamepad1.right_stick_y);
         robot.frontRight.setPower(-gamepad1.right_stick_y);
+        if (gamepad1.dpad_up) {
+            robot.roller.setPower(1);
+        }
+        else if (gamepad1.dpad_down){
+            robot.roller.setPower(-1);
+        }
+        else{
+            robot.roller.setPower(0);
+        }
+
 
         //Return Encoder Values
         telemetry.addData("Left Back Encoder", "Value is "+robot.backLeft.getCurrentPosition());

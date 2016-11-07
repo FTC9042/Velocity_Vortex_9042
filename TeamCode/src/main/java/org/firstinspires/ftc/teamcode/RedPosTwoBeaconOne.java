@@ -95,6 +95,7 @@ public class RedPosTwoBeaconOne extends LinearOpMode{
         telemetry.addData("Status", "Backwards 35 Inches");
         telemetry.update();
         runStraight(-35,5);
+        telemetry.addData("Status", "Sensing");
 
 
     }
@@ -190,6 +191,17 @@ public class RedPosTwoBeaconOne extends LinearOpMode{
                 Math.abs(robot.backLeft.getCurrentPosition() - leftTarget) <= TOLERANCE &&
                 Math.abs(robot.frontRight.getCurrentPosition() - rightTarget) <= TOLERANCE &&
                 Math.abs(robot.backRight.getCurrentPosition() - rightTarget) <= TOLERANCE);
+    }
+
+    public void whichColor(boolean red) {
+        if (robot.color.red() > robot.color.blue() && robot.color.red() > robot.color.green()){
+            if (!red){
+                //Servo Position to right side
+            }
+            else{
+                //Servo Position to left side
+            }
+        }
     }
 
 }
