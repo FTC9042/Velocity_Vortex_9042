@@ -131,11 +131,14 @@ public class RedPosTwoParkCorner extends LinearOpMode{
         if (opModeIsActive()){
             robot.setToWOEncoderMode();
             runtime.reset();
-            robot.setMotorPower(.1,-.1);
+            robot.setMotorPower(.08,-.08);
             int targetAngle = robot.gyro.getHeading()+angle;
-            while (opModeIsActive() && (runtime.seconds() < timeoutS) && robot.gyro.getHeading()<=targetAngle-3) {
+            if (targetAngle>=360){
+                targetAngle-=360;
+            }
+            while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-targetAngle)>=4) {
                 // Display it for the driver.
-                telemetry.addData("Gyro", "Target is %d and Current is %d",angle, robot.gyro.getHeading() );
+                telemetry.addData("Gyro", "Turning Right %d degrees. Target is %d and Current is %d",angle , targetAngle, robot.gyro.getHeading() );
                 telemetry.update();
 
                 // Allow time for other processes to run.
@@ -151,31 +154,22 @@ public class RedPosTwoParkCorner extends LinearOpMode{
         if (opModeIsActive()){
             robot.setToWOEncoderMode();
             runtime.reset();
-            robot.setMotorPower(-.1,.1);
-            int currentAngle;
+            robot.setMotorPower(-.08,.08);
             int targetAngle = robot.gyro.getHeading()-angle;
             if (targetAngle<0){
-                targetAngle = targetAngle+360;
+                targetAngle += 360;
             }
-            if (robot.gyro.getHeading()<=5) {
-                currentAngle = robot.gyro.getHeading() + 360;
-            }
-            else{
-                currentAngle = robot.gyro.getHeading();
-            }
-            while (opModeIsActive() && (runtime.seconds() < timeoutS) && currentAngle-targetAngle>=3) {
+            while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-targetAngle)>=4) {
                 // Display it for the driver.
-                if (robot.gyro.getHeading() <= 5) {
-                    currentAngle = robot.gyro.getHeading() + 360;
-                } else {
-                    currentAngle = robot.gyro.getHeading();
-                }
+                telemetry.addData("Gyro", "Turning Left %d degrees. Target is %d and Current is %d",angle , targetAngle, robot.gyro.getHeading() );
+                telemetry.update();
             }
             robot.setMotorPower(0,0);
             robot.resetEncoders();
 
         }
     }
+
 
     public void setTargetValueMotor() {
         robot.frontLeft.setTargetPosition(leftTarget);
