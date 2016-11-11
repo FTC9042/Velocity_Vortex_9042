@@ -68,14 +68,19 @@ public class BluePosTwoParkCorner extends LinearOpMode{
 
     @Override
     public void runOpMode() throws InterruptedException {
-
         robot.init(hardwareMap);
 
-        telemetry.update();
         robot.resetGyro();
         robot.setDirection();
         robot.resetEncoders();
         telemetry.addData("Status", "Resetting Encoders | Left:"+ robot.backLeft.getCurrentPosition()+" Right:"+robot.backRight.getCurrentPosition());
+        while (robot.gyro.isCalibrating() && !opModeIsActive()){
+            telemetry.addData("Status", "Gyro is Resetting. Currently at "+ robot.gyro.getHeading());
+            telemetry.update();
+
+            idle();
+        }
+        telemetry.addData("Status", "Gyro is done Calibrating.");
         telemetry.update();
 
         waitForStart();
@@ -86,28 +91,36 @@ public class BluePosTwoParkCorner extends LinearOpMode{
         runStraight(38, 10);
         telemetry.addData("Status", "Turn left 45 degrees");
         telemetry.update();
-        turnRight(45, 5);
+        turnRight(45, 10);
         telemetry.addData("Status", "Forward 10 Inches");
         telemetry.update();
-        runStraight(10, 10);
-        telemetry.addData("Status", "Turn Left 60 degrees");
+        runStraight(5, 10);
+        telemetry.addData("Status", "Forward 10 Inches");
         telemetry.update();
-        turnRight(60, 10);
+        runStraight(21, 10);
+        telemetry.addData("Status", "Turn left 90 Degrees");
+        telemetry.update();
+        turnRight(90, 10);
         telemetry.addData("Status", "Forwards 50 Inches");
         telemetry.update();
-        runStraight(50, 10);
+        runStraight(40, 10);
+        telemetry.addData("Status", "Aligning for Outtake");
+        telemetry.update();
+        turnTowards(135,15);
+        runStraight(22,10);
+        telemetry.addData("Status", "Outtake the balls");
+        telemetry.update();
+        rollout(10);
     }
-
-
     //ENCODER BASED MOVEMENT
     public void runStraight(double distance_in_inches, int timeoutS) throws InterruptedException{
         if (opModeIsActive()){
-        leftTarget = (int) (distance_in_inches * TICKS_PER_INCH);
-        rightTarget = leftTarget;
-        robot.setToEncoderMode();
-        setTargetValueMotor();
+            leftTarget = (int) (distance_in_inches * TICKS_PER_INCH);
+            rightTarget = leftTarget;
+            robot.setToEncoderMode();
+            setTargetValueMotor();
             runtime.reset();
-            robot.setMotorPower(.4 , .4);
+            robot.setMotorPower(.4,.4);
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && !hasReached()) {
                 // Display it for the driver.
                 telemetry.addData("Back Right Motor", "Target %7d: Current Pos %7d", robot.backRight.getTargetPosition(), robot.backRight.getCurrentPosition());
@@ -122,7 +135,7 @@ public class BluePosTwoParkCorner extends LinearOpMode{
             }
             robot.setMotorPower(0,0);
             robot.resetEncoders();
-            sleep(2000);
+            sleep(1000);
         }
     }
 
@@ -131,7 +144,7 @@ public class BluePosTwoParkCorner extends LinearOpMode{
         if (opModeIsActive()){
             robot.setToWOEncoderMode();
             runtime.reset();
-            robot.setMotorPower(.08,-.08);
+            robot.setMotorPower(.1,-.1);
             int targetAngle = robot.gyro.getHeading()+angle;
             if (targetAngle>=360){
                 targetAngle-=360;
@@ -154,7 +167,7 @@ public class BluePosTwoParkCorner extends LinearOpMode{
         if (opModeIsActive()){
             robot.setToWOEncoderMode();
             runtime.reset();
-            robot.setMotorPower(-.08,.08);
+            robot.setMotorPower(-.12,.12);
             int targetAngle = robot.gyro.getHeading()-angle;
             if (targetAngle<0){
                 targetAngle += 360;
@@ -163,6 +176,7 @@ public class BluePosTwoParkCorner extends LinearOpMode{
                 // Display it for the driver.
                 telemetry.addData("Gyro", "Turning Left %d degrees. Target is %d and Current is %d",angle , targetAngle, robot.gyro.getHeading() );
                 telemetry.update();
+                idle();
             }
             robot.setMotorPower(0,0);
             robot.resetEncoders();
@@ -170,6 +184,35 @@ public class BluePosTwoParkCorner extends LinearOpMode{
         }
     }
 
+    public void rollout(int timeoutS){
+        runtime.reset();
+        while (opModeIsActive() && runtime.seconds() < timeoutS){
+            robot.roller.setPower(1);
+        }
+    }
+
+    public void turnTowards(int angle, int timeoutS) throws InterruptedException{
+        if (opModeIsActive()){
+            runtime.reset();
+            robot.setToWOEncoderMode();
+            if (robot.gyro.getHeading()>angle){
+                robot.setMotorPower(-.1,.1);
+            }
+            else{
+                robot.setMotorPower(.1, -.1);
+            }
+            while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-angle)>=3) {
+                // Display it for the driver.
+                telemetry.addData("Gyro", "Target is %d and Current is %d", angle, robot.gyro.getHeading() );
+                telemetry.update();
+
+                idle();
+            }
+            robot.setMotorPower(0,0);
+            robot.resetEncoders();
+            sleep(500);
+        }
+    }
 
     public void setTargetValueMotor() {
         robot.frontLeft.setTargetPosition(leftTarget);

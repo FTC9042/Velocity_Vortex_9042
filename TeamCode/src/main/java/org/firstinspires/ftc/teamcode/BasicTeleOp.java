@@ -56,13 +56,46 @@ public class BasicTeleOp extends OpMode {
     public void loop() {
         telemetry.addData("Status", "Running: " + runtime.toString());
 
-        robot.backLeft.setPower(-gamepad1.left_stick_y);
-        robot.frontLeft.setPower(-gamepad1.left_stick_y);
-        robot.backRight.setPower(-gamepad1.right_stick_y);
-        robot.frontRight.setPower(-gamepad1.right_stick_y);
+        //Gamepad 1 (Driver) controls
+        if (gamepad1.right_trigger>0) {
+            setMotorPower(-.3*gamepad1.left_stick_y, -.3*gamepad1.right_stick_y);
 
+        }
+        else if (gamepad1.y){
+            setMotorPower(.3,.3);
+        }
+        else if (gamepad1.a){
+            setMotorPower(-.3,-.3);
+        }
+        else {
+            setMotorPower(-gamepad1.left_stick_y, -gamepad1.right_stick_y);
+        }
 
-        robot.roller.setPower(gamepad2.left_stick_y);
+        //Gamepad 2 (Operator) Controls
+        //Intake mechanism Manipulation
+        if (gamepad2.y) {
+            robot.roller.setPower(1);
+        }
+        else if (gamepad2.a){
+            robot.roller.setPower(-.5);
+        }
+        else if (gamepad2.x){
+            robot.roller.setPower(.5);
+        }
+        else{
+            robot.roller.setPower(0);
+        }
+
+        //Beacon Booper Manipulation
+        if (gamepad2.dpad_right){
+            robot.booper.setPosition(1);
+        }
+        else if (gamepad2.dpad_left){
+            robot.booper.setPosition(0);
+        }
+        else if (gamepad2.b){
+            robot.booper.setPosition(.5);
+        }
 
 
         //Return Encoder Values
@@ -80,6 +113,12 @@ public class BasicTeleOp extends OpMode {
      */
     @Override
     public void stop() {
-
+        setMotorPower(0,0);
+    }
+    public void setMotorPower(double leftPower, double rightPower){
+        robot.backLeft.setPower(leftPower);
+        robot.frontLeft.setPower(leftPower);
+        robot.backRight.setPower(rightPower);
+        robot.frontRight.setPower(rightPower);
     }
 }

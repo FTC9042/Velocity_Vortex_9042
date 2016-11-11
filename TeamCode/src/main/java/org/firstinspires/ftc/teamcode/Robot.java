@@ -21,6 +21,8 @@ public class Robot
 
     ColorSensor color;
 
+    Servo booper;
+
     /* Local OpMode members. */
     HardwareMap hardwareMap  = null;
     private ElapsedTime period  = new ElapsedTime();
@@ -44,9 +46,14 @@ public class Robot
         //Manipulators
         roller = hardwareMap.dcMotor.get("intake");
 
+        //Sensors
         gyro = hardwareMap.gyroSensor.get("gyro");
-
         color = hardwareMap.colorSensor.get("color");
+
+        //Servos
+        booper = hardwareMap.servo.get("beacon");
+
+
 
         backLeft.setPower(0);
         backRight.setPower(0);
@@ -99,9 +106,7 @@ public class Robot
      * Sets all motors to RUN_USING_ENCODER mode
      */
     public void resetEncoders() {
-        DcMotor.RunMode prev = backLeft.getMode();
         setMotorMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        setMotorMode(prev);
     }
 
     /**
