@@ -50,15 +50,6 @@ public class BluePosTwoParkCorner extends LinearOpMode{
     private int rightTarget,
             leftTarget;
 
-
-    //MOTOR RANGES
-    private final double MOTOR_MAX = 1,
-            MOTOR_MIN = -1;
-    private final double INCHES_PER_DEGREE = Math.PI/20;
-
-
-    protected boolean on = true;
-
     //ENCODER CONSTANTS
     private final double CIRCUMFERENCE_INCHES = 4 * Math.PI,
             TICKS_PER_ROTATION = 1200 / 0.8522,
@@ -97,10 +88,11 @@ public class BluePosTwoParkCorner extends LinearOpMode{
         runStraight(5, 10);
         telemetry.addData("Status", "Forward 10 Inches");
         telemetry.update();
-        runStraight(21, 10);
+        turnRight(45,10);
+        runStraight(15, 10);
         telemetry.addData("Status", "Turn left 90 Degrees");
         telemetry.update();
-        turnRight(90, 10);
+        turnRight(45, 10);
         telemetry.addData("Status", "Forwards 50 Inches");
         telemetry.update();
         runStraight(40, 10);

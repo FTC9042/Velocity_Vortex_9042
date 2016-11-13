@@ -103,7 +103,7 @@ public class BluePosTwoOnlyParkCorner extends LinearOpMode{
         telemetry.addData("Status", "Aligning for Outtake");
         telemetry.update();
         turnTowards(135,5);
-        runStraight(17,5);
+        runStraight(15,5);
         telemetry.addData("Status", "Outtake the balls");
         telemetry.update();
         rollout(10);
@@ -117,7 +117,7 @@ public class BluePosTwoOnlyParkCorner extends LinearOpMode{
             robot.setToEncoderMode();
             setTargetValueMotor();
             runtime.reset();
-            robot.setMotorPower(.4,.4);
+            robot.setMotorPower(.5 , .5);
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && !hasReached()) {
                 // Display it for the driver.
                 telemetry.addData("Back Right Motor", "Target %7d: Current Pos %7d", robot.backRight.getTargetPosition(), robot.backRight.getCurrentPosition());
@@ -141,7 +141,7 @@ public class BluePosTwoOnlyParkCorner extends LinearOpMode{
         if (opModeIsActive()){
             robot.setToWOEncoderMode();
             runtime.reset();
-            robot.setMotorPower(.1,-.1);
+            robot.setMotorPower(.1 , -.1);
             int targetAngle = robot.gyro.getHeading()+angle;
             if (targetAngle>=360){
                 targetAngle-=360;
@@ -192,7 +192,7 @@ public class BluePosTwoOnlyParkCorner extends LinearOpMode{
         if (opModeIsActive()){
             runtime.reset();
             robot.setToWOEncoderMode();
-            if (robot.gyro.getHeading()>angle){
+            if (robot.gyro.getHeading()>=angle){
                 robot.setMotorPower(-.1,.1);
             }
             else{

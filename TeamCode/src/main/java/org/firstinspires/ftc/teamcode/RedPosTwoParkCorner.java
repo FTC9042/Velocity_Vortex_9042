@@ -51,8 +51,6 @@ public class RedPosTwoParkCorner extends LinearOpMode{
             leftTarget;
 
 
-    protected boolean on = true;
-
     //ENCODER CONSTANTS
     private final double CIRCUMFERENCE_INCHES = 4 * Math.PI,
             TICKS_PER_ROTATION = 1200 / 0.8522,
@@ -86,22 +84,17 @@ public class RedPosTwoParkCorner extends LinearOpMode{
         telemetry.addData("Status", "Turn left 45 degrees");
         telemetry.update();
         turnLeft(45, 10);
-        telemetry.addData("Status", "Forward 10 Inches");
+        telemetry.addData("Status", "Forward 5 Inches");
         telemetry.update();
         runStraight(5, 10);
-        telemetry.addData("Status", "Forward 10 Inches");
+        telemetry.addData("Status", "Turn Left 45 Degrees");
         telemetry.update();
-        runStraight(21, 10);
-        telemetry.addData("Status", "Turn left 90 Degrees");
-        telemetry.update();
-        turnLeft(90, 10);
-        telemetry.addData("Status", "Forwards 50 Inches");
-        telemetry.update();
-        runStraight(35, 10);
-        telemetry.addData("Status", "Aligning for Outtake");
+        turnLeft(45, 10);
+        runStraight(20, 10);
+        telemetry.addData("Status", "Turn left 45 Degrees");
         telemetry.update();
         turnTowards(225,5);
-        runStraight(27, 5);
+        runStraight(40, 5);
         telemetry.addData("Status", "Outtake the balls");
         telemetry.update();
         rollout(10);
@@ -161,7 +154,7 @@ public class RedPosTwoParkCorner extends LinearOpMode{
         if (opModeIsActive()){
             robot.setToWOEncoderMode();
             runtime.reset();
-            robot.setMotorPower(-.12,.12);
+            robot.setMotorPower(-.1,.1);
             int targetAngle = robot.gyro.getHeading()-angle;
             if (targetAngle<0){
                 targetAngle += 360;

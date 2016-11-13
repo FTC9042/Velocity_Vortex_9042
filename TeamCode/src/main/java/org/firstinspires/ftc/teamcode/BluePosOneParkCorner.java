@@ -51,15 +51,6 @@ public class BluePosOneParkCorner extends LinearOpMode{
     private int rightTarget,
             leftTarget;
 
-
-    //MOTOR RANGES
-    private final double MOTOR_MAX = 1,
-            MOTOR_MIN = -1;
-    private final double INCHES_PER_DEGREE = Math.PI/20;
-
-
-    protected boolean on = true;
-
     //ENCODER CONSTANTS
     private final double CIRCUMFERENCE_INCHES = 4 * Math.PI,
             TICKS_PER_ROTATION = 1200 / 0.8522,

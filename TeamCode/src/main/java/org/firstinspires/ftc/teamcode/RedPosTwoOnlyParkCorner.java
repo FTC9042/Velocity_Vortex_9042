@@ -50,15 +50,6 @@ public class RedPosTwoOnlyParkCorner extends LinearOpMode{
     private int rightTarget,
             leftTarget;
 
-
-    //MOTOR RANGES
-    private final double MOTOR_MAX = 1,
-            MOTOR_MIN = -1;
-    private final double INCHES_PER_DEGREE = Math.PI/20;
-
-
-    protected boolean on = true;
-
     //ENCODER CONSTANTS
     private final double CIRCUMFERENCE_INCHES = 4 * Math.PI,
             TICKS_PER_ROTATION = 1200 / 0.8522,
@@ -104,7 +95,7 @@ public class RedPosTwoOnlyParkCorner extends LinearOpMode{
         telemetry.addData("Status", "Aligning for Outtake");
         telemetry.update();
         turnTowards(225,5);
-        runStraight(17,10);
+        runStraight(15,5);
         telemetry.addData("Status", "Outtake the balls");
         telemetry.update();
         rollout(10);
@@ -117,7 +108,7 @@ public class RedPosTwoOnlyParkCorner extends LinearOpMode{
             robot.setToEncoderMode();
             setTargetValueMotor();
             runtime.reset();
-            robot.setMotorPower(.4,.4);
+            robot.setMotorPower(.4 , .4);
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && !hasReached()) {
                 // Display it for the driver.
                 telemetry.addData("Back Right Motor", "Target %7d: Current Pos %7d", robot.backRight.getTargetPosition(), robot.backRight.getCurrentPosition());
@@ -226,7 +217,6 @@ public class RedPosTwoOnlyParkCorner extends LinearOpMode{
     public boolean hasReached() {
         return (Math.abs(robot.frontLeft.getCurrentPosition() - leftTarget) <= TOLERANCE &&
                 Math.abs(robot.backLeft.getCurrentPosition() - leftTarget) <= TOLERANCE &&
-                Math.abs(robot.frontRight.getCurrentPosition() - rightTarget) <= TOLERANCE &&
                 Math.abs(robot.backRight.getCurrentPosition() - rightTarget) <= TOLERANCE);
     }
 
