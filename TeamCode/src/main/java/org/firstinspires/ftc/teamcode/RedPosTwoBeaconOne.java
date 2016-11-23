@@ -39,12 +39,13 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 //Back left wheel is on the second crack away from the corner vortex on driver side
 //Flush against wall
 
-@Autonomous(name="Red Pos2: Go to Beacon One", group="Red Position 2")
+@Autonomous(name="Red Pos2: BEACON(S)!", group="Red Position 2")
 //@Disabled
 public class RedPosTwoBeaconOne extends LinearOpMode{
 
     Robot robot   = new Robot();
     private ElapsedTime     runtime = new ElapsedTime();
+    private ElapsedTime     elapsed;
 
     //encoder targets
     private int rightTarget,
@@ -61,6 +62,7 @@ public class RedPosTwoBeaconOne extends LinearOpMode{
     public void runOpMode() throws InterruptedException {
 
         robot.init(hardwareMap);
+        robot.color.enableLed(false);
 
         robot.resetGyro();
         robot.setDirection();
@@ -76,28 +78,46 @@ public class RedPosTwoBeaconOne extends LinearOpMode{
         telemetry.update();
 
         waitForStart();
+        elapsed = new ElapsedTime();
 
-        telemetry.addData("Status", "Forward 24 Inches");
-        telemetry.update();
-        runStraight(24, 10);
-        telemetry.addData("Status", "Turning Left 45 Degrees");
-        telemetry.update();
+        runStraight(24, 10, .6);
         turnLeft(45, 10);
-        telemetry.addData("Status", "Forward 48 Inches");
-        telemetry.update();
-        runStraight(48,10);
-        telemetry.addData("Status", "Turning Right 145 Degrees");
-        telemetry.update();
-        turnRight(145,10);
-        telemetry.addData("Status", "Backwards 35 Inches");
-        telemetry.update();
-        runStraight(-35,5);
-        telemetry.addData("Status", "Sensing");
-
+        runStraight(54, 10, .8);
+        turnLeft(40,5);
+        turnTowards(270, 5);
+        runStraight(19.5, 4, 1);
+        runStraight(-2, 1, .4);
+        sleep(500);
+        if (!isColorRed()){
+            sleep(4500);
+            runStraight(3, 1, .4);
+        }
+        runStraight(-10, 3, .8);
+        if (elapsed.seconds()<15) {
+            turnRight(90,5);
+            runStraight(48, 10, .8);
+            turnLeft(90, 5);
+            turnTowards(270, 5);
+            if (elapsed.seconds() < 23) {
+                runStraight(11, 2, .4);
+                if (!isColorRed()) {
+                    runStraight(-2, 3, .4);
+                    sleep(5000);
+                    runStraight(3, 4, .4);
+                }
+            }
+        }
+        else{
+            turnRight(45, 5);
+            runStraight(-24, 4, 1);
+            turnTowards(230, 5);
+            runStraight(31, 5, 1);
+            rollout(10);
+        }
 
     }
     //ENCODER BASED MOVEMENT
-    public void runStraight(double distance_in_inches, int timeoutS) throws InterruptedException{
+    public void runStraight(double distance_in_inches, int timeoutS, double speed) throws InterruptedException{
         if (opModeIsActive()){
             leftTarget = (int) (distance_in_inches * TICKS_PER_INCH);
             rightTarget = leftTarget;
@@ -106,15 +126,7 @@ public class RedPosTwoBeaconOne extends LinearOpMode{
             runtime.reset();
             robot.setMotorPower(.4,.4);
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && !hasReached()) {
-                // Display it for the driver.
-                telemetry.addData("Back Right Motor", "Target %7d: Current Pos %7d", robot.backRight.getTargetPosition(), robot.backRight.getCurrentPosition());
-                telemetry.addData("Front Right Motor", "Target %7d: Current Pos %7d", robot.frontRight.getTargetPosition(), robot.frontRight.getCurrentPosition());
-                telemetry.addData("Back Left Motor", "Target %7d: Current Pos %7d", robot.backLeft.getTargetPosition(), robot.backLeft.getCurrentPosition());
-                telemetry.addData("Front Left Motor", "Target %7d: Current Pos %7d", robot.frontLeft.getTargetPosition(), robot.frontLeft.getCurrentPosition());
-                telemetry.addData("Gyro", "Robot is facing %d",robot.gyro.getHeading());
-                telemetry.update();
-
-                // Allow time for other processes to run.
+                basicTel();
                 idle();
             }
             robot.setMotorPower(0,0);
@@ -122,22 +134,31 @@ public class RedPosTwoBeaconOne extends LinearOpMode{
         }
     }
 
+    public boolean isColorRed(){
+        if (robot.color.red()>robot.color.blue() && robot.color.red()>=1){
+            telemetry.addData("Colors","Red is %d and Blue is %d", robot.color.red(), robot.color.blue());
+            telemetry.addData("Course","The color detected was red");
+            telemetry.update();
+            return true;
+        }
+        telemetry.addData("Colors","Red is %d and Blue is %d", robot.color.red(), robot.color.blue());
+        telemetry.addData("Course","The color detected was blue");
+        telemetry.update();
+        return false;
+    }
+
     //Turning With Gyro's
     public void turnRight(int angle, int timeoutS) throws InterruptedException{
         if (opModeIsActive()){
             robot.setToWOEncoderMode();
             runtime.reset();
-            robot.setMotorPower(.1,-.1);
+            robot.setMotorPower(.12,-.12);
             int targetAngle = robot.gyro.getHeading()+angle;
             if (targetAngle>=360){
                 targetAngle-=360;
             }
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-targetAngle)>=4) {
-                // Display it for the driver.
-                telemetry.addData("Gyro", "Turning Right %d degrees. Target is %d and Current is %d",angle , targetAngle, robot.gyro.getHeading() );
-                telemetry.update();
-
-                // Allow time for other processes to run.
+                basicTel();
                 idle();
             }
             robot.setMotorPower(0,0);
@@ -150,15 +171,13 @@ public class RedPosTwoBeaconOne extends LinearOpMode{
         if (opModeIsActive()){
             robot.setToWOEncoderMode();
             runtime.reset();
-            robot.setMotorPower(-.1,.1);
+            robot.setMotorPower(-.12,.12);
             int targetAngle = robot.gyro.getHeading()-angle;
             if (targetAngle<0){
                 targetAngle += 360;
             }
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-targetAngle)>=4) {
-                // Display it for the driver.
-                telemetry.addData("Gyro", "Turning Left %d degrees. Target is %d and Current is %d",angle , targetAngle, robot.gyro.getHeading() );
-                telemetry.update();
+                basicTel();
                 idle();
             }
             robot.setMotorPower(0,0);
@@ -178,12 +197,14 @@ public class RedPosTwoBeaconOne extends LinearOpMode{
         if (opModeIsActive()){
             runtime.reset();
             robot.setToWOEncoderMode();
-            robot.setMotorPower(-.1,.1);
-            while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-angle)>=2) {
-                // Display it for the driver.
-                telemetry.addData("Gyro", "Target is %d and Current is %d", angle, robot.gyro.getHeading() );
-                telemetry.update();
-
+            if (robot.gyro.getHeading()>angle){
+                robot.setMotorPower(-.1,.1);
+            }
+            else{
+                robot.setMotorPower(.1, -.1);
+            }
+            while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-angle)>=3) {
+                basicTel();
                 idle();
             }
             robot.setMotorPower(0,0);
@@ -207,4 +228,14 @@ public class RedPosTwoBeaconOne extends LinearOpMode{
                 Math.abs(robot.backRight.getCurrentPosition() - rightTarget) <= TOLERANCE);
     }
 
+    public void basicTel(){
+        telemetry.addData("Back Right Motor", "Target %7d: Current Pos %7d", robot.backRight.getTargetPosition(), robot.backRight.getCurrentPosition());
+        telemetry.addData("Front Right Motor", "Target %7d: Current Pos %7d", robot.frontRight.getTargetPosition(), robot.frontRight.getCurrentPosition());
+        telemetry.addData("Back Left Motor", "Target %7d: Current Pos %7d", robot.backLeft.getTargetPosition(), robot.backLeft.getCurrentPosition());
+        telemetry.addData("Front Left Motor", "Target %7d: Current Pos %7d", robot.frontLeft.getTargetPosition(), robot.frontLeft.getCurrentPosition());
+        telemetry.addData("Gyro", "Robot is facing %d",robot.gyro.getHeading());
+        telemetry.addData("Colors","Red is %d and Blue is %d", robot.color.red(), robot.color.blue());
+        telemetry.addData("Time", "Total Elapsed time is %.2f", elapsed.seconds());
+        telemetry.update();
+    }
 }

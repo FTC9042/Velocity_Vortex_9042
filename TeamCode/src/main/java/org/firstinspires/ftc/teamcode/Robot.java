@@ -23,6 +23,7 @@ public class Robot
 
     Servo booper;
 
+
     /* Local OpMode members. */
     HardwareMap hardwareMap  = null;
     private ElapsedTime period  = new ElapsedTime();
@@ -108,6 +109,7 @@ public class Robot
     public void resetEncoders() {
         setMotorMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     }
+
 
     /**
      * Sets the direction config of motors

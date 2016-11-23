@@ -109,15 +109,7 @@ public class RedPosTwoParkCorner extends LinearOpMode{
             runtime.reset();
             robot.setMotorPower(.4,.4);
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && !hasReached()) {
-                // Display it for the driver.
-                telemetry.addData("Back Right Motor", "Target %7d: Current Pos %7d", robot.backRight.getTargetPosition(), robot.backRight.getCurrentPosition());
-                telemetry.addData("Front Right Motor", "Target %7d: Current Pos %7d", robot.frontRight.getTargetPosition(), robot.frontRight.getCurrentPosition());
-                telemetry.addData("Back Left Motor", "Target %7d: Current Pos %7d", robot.backLeft.getTargetPosition(), robot.backLeft.getCurrentPosition());
-                telemetry.addData("Front Left Motor", "Target %7d: Current Pos %7d", robot.frontLeft.getTargetPosition(), robot.frontLeft.getCurrentPosition());
-                telemetry.addData("Gyro", "Robot is facing %d",robot.gyro.getHeading());
-                telemetry.update();
-
-                // Allow time for other processes to run.
+                basicTel();
                 idle();
             }
             robot.setMotorPower(0,0);
@@ -137,11 +129,7 @@ public class RedPosTwoParkCorner extends LinearOpMode{
                 targetAngle-=360;
             }
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-targetAngle)>=4) {
-                // Display it for the driver.
-                telemetry.addData("Gyro", "Turning Right %d degrees. Target is %d and Current is %d",angle , targetAngle, robot.gyro.getHeading() );
-                telemetry.update();
-
-                // Allow time for other processes to run.
+                basicTel();
                 idle();
             }
             robot.setMotorPower(0,0);
@@ -160,9 +148,7 @@ public class RedPosTwoParkCorner extends LinearOpMode{
                 targetAngle += 360;
             }
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-targetAngle)>=4) {
-                // Display it for the driver.
-                telemetry.addData("Gyro", "Turning Left %d degrees. Target is %d and Current is %d",angle , targetAngle, robot.gyro.getHeading() );
-                telemetry.update();
+                basicTel();
                 idle();
             }
             robot.setMotorPower(0,0);
@@ -189,10 +175,7 @@ public class RedPosTwoParkCorner extends LinearOpMode{
                 robot.setMotorPower(.1, -.1);
             }
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-angle)>=3) {
-                // Display it for the driver.
-                telemetry.addData("Gyro", "Target is %d and Current is %d", angle, robot.gyro.getHeading() );
-                telemetry.update();
-
+                basicTel();
                 idle();
             }
             robot.setMotorPower(0,0);
@@ -214,6 +197,16 @@ public class RedPosTwoParkCorner extends LinearOpMode{
                 Math.abs(robot.backLeft.getCurrentPosition() - leftTarget) <= TOLERANCE &&
                 Math.abs(robot.frontRight.getCurrentPosition() - rightTarget) <= TOLERANCE &&
                 Math.abs(robot.backRight.getCurrentPosition() - rightTarget) <= TOLERANCE);
+    }
+
+    public void basicTel(){
+        telemetry.addData("Back Right Motor", "Target %7d: Current Pos %7d", robot.backRight.getTargetPosition(), robot.backRight.getCurrentPosition());
+        telemetry.addData("Front Right Motor", "Target %7d: Current Pos %7d", robot.frontRight.getTargetPosition(), robot.frontRight.getCurrentPosition());
+        telemetry.addData("Back Left Motor", "Target %7d: Current Pos %7d", robot.backLeft.getTargetPosition(), robot.backLeft.getCurrentPosition());
+        telemetry.addData("Front Left Motor", "Target %7d: Current Pos %7d", robot.frontLeft.getTargetPosition(), robot.frontLeft.getCurrentPosition());
+        telemetry.addData("Gyro", "Robot is facing %d",robot.gyro.getHeading());
+        telemetry.addData("Colors","Red is %d and Blue is %d", robot.color.red(), robot.color.blue());
+        telemetry.update();
     }
 
 }
