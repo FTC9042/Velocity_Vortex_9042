@@ -41,7 +41,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 @Autonomous(name="Red Pos2: BEACON(S)!", group="Red Position 2")
 //@Disabled
-public class RedPosTwoBeaconOne extends LinearOpMode{
+public class RedPosTwoBeacons extends LinearOpMode{
 
     Robot robot   = new Robot();
     private ElapsedTime     runtime = new ElapsedTime();
@@ -62,7 +62,7 @@ public class RedPosTwoBeaconOne extends LinearOpMode{
     public void runOpMode() throws InterruptedException {
 
         robot.init(hardwareMap);
-        robot.color.enableLed(false);
+        robot.color.enableLed(true);
 
         robot.resetGyro();
         robot.setDirection();
@@ -80,38 +80,42 @@ public class RedPosTwoBeaconOne extends LinearOpMode{
         waitForStart();
         elapsed = new ElapsedTime();
 
-        runStraight(24, 10, .6);
+        runStraight(20, 10, .6);
         turnLeft(45, 10);
-        runStraight(54, 10, .8);
-        turnLeft(40,5);
+        runStraight(62, 10, .6);
         turnTowards(270, 5);
-        runStraight(19.5, 4, 1);
-        runStraight(-2, 1, .4);
-        sleep(500);
+        runStraight(13, 4, .6);
+        runStraight(-2, 1, .6);
+        sleep(250);
         if (!isColorRed()){
-            sleep(4500);
-            runStraight(3, 1, .4);
+            sleep(4700);
+            runStraight(3, 1, .6);
         }
-        runStraight(-10, 3, .8);
-        if (elapsed.seconds()<15) {
+        runStraight(-10, 3, .6);
+
+        if (elapsed.seconds()<17) {
             turnRight(90,5);
-            runStraight(48, 10, .8);
+            turnTowards(0, 2);
+            runStraight(41, 5, .6);
             turnLeft(90, 5);
             turnTowards(270, 5);
             if (elapsed.seconds() < 23) {
-                runStraight(11, 2, .4);
+                runStraight(15, 2, .4);
+                runStraight(-2, 1, .6);
+                sleep(250);
                 if (!isColorRed()) {
-                    runStraight(-2, 3, .4);
-                    sleep(5000);
-                    runStraight(3, 4, .4);
+                    sleep(4700);
+                    runStraight(3, 1, .3);
                 }
             }
         }
         else{
             turnRight(45, 5);
-            runStraight(-24, 4, 1);
+            runStraight(-24, 4, .6);
             turnTowards(230, 5);
-            runStraight(31, 5, 1);
+            runStraight(29, 4, .6);
+            robot.roller.setPower(1);
+            runStraight(4, 5, .6);
             rollout(10);
         }
 
@@ -124,13 +128,15 @@ public class RedPosTwoBeaconOne extends LinearOpMode{
             robot.setToEncoderMode();
             setTargetValueMotor();
             runtime.reset();
-            robot.setMotorPower(.4,.4);
+            robot.setMotorPower(speed,speed);
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && !hasReached()) {
+                robot.checkPower(speed, speed);
                 basicTel();
                 idle();
             }
             robot.setMotorPower(0,0);
             robot.resetEncoders();
+            sleep(500);
         }
     }
 
@@ -152,17 +158,19 @@ public class RedPosTwoBeaconOne extends LinearOpMode{
         if (opModeIsActive()){
             robot.setToWOEncoderMode();
             runtime.reset();
-            robot.setMotorPower(.12,-.12);
+            robot.setMotorPower(.13,-.13);
             int targetAngle = robot.gyro.getHeading()+angle;
             if (targetAngle>=360){
                 targetAngle-=360;
             }
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-targetAngle)>=4) {
+                robot.checkPower(.13, -.13);
                 basicTel();
                 idle();
             }
             robot.setMotorPower(0,0);
             robot.resetEncoders();
+            sleep(500);
         }
     }
 
@@ -171,18 +179,19 @@ public class RedPosTwoBeaconOne extends LinearOpMode{
         if (opModeIsActive()){
             robot.setToWOEncoderMode();
             runtime.reset();
-            robot.setMotorPower(-.12,.12);
+            robot.setMotorPower(-.13,.13);
             int targetAngle = robot.gyro.getHeading()-angle;
             if (targetAngle<0){
                 targetAngle += 360;
             }
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-targetAngle)>=4) {
+                robot.checkPower(-.13, .13);
                 basicTel();
                 idle();
             }
             robot.setMotorPower(0,0);
             robot.resetEncoders();
-
+            sleep(500);
         }
     }
 
@@ -190,6 +199,7 @@ public class RedPosTwoBeaconOne extends LinearOpMode{
         runtime.reset();
         while (opModeIsActive() && runtime.seconds() < timeoutS){
             robot.roller.setPower(1);
+            idle();
         }
     }
 
@@ -199,13 +209,19 @@ public class RedPosTwoBeaconOne extends LinearOpMode{
             robot.setToWOEncoderMode();
             if (robot.gyro.getHeading()>angle){
                 robot.setMotorPower(-.1,.1);
+                while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-angle)>=3) {
+                    robot.checkPower(-.1, .1);
+                    basicTel();
+                    idle();
+                }
             }
             else{
                 robot.setMotorPower(.1, -.1);
-            }
-            while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-angle)>=3) {
-                basicTel();
-                idle();
+                while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-angle)>=3) {
+                    robot.checkPower(.1, -.1);
+                    basicTel();
+                    idle();
+                }
             }
             robot.setMotorPower(0,0);
             robot.resetEncoders();

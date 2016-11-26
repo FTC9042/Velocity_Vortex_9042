@@ -95,7 +95,7 @@ public class RedPosTwoOnlyParkCorner extends LinearOpMode{
         telemetry.addData("Status", "Aligning for Outtake");
         telemetry.update();
         turnTowards(225,5);
-        runStraight(15,5);
+        runStraight(17,5);
         telemetry.addData("Status", "Outtake the balls");
         telemetry.update();
         rollout(10);
@@ -108,14 +108,14 @@ public class RedPosTwoOnlyParkCorner extends LinearOpMode{
             robot.setToEncoderMode();
             setTargetValueMotor();
             runtime.reset();
-            robot.setMotorPower(.4 , .4);
+            robot.setMotorPower(.4,.4);
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && !hasReached()) {
+                robot.checkPower(.4, .4);
                 basicTel();
                 idle();
             }
             robot.setMotorPower(0,0);
             robot.resetEncoders();
-
             sleep(1000);
         }
     }
@@ -131,13 +131,12 @@ public class RedPosTwoOnlyParkCorner extends LinearOpMode{
                 targetAngle-=360;
             }
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-targetAngle)>=4) {
+                robot.checkPower(.1, -.1);
                 basicTel();
                 idle();
             }
             robot.setMotorPower(0,0);
             robot.resetEncoders();
-
-            sleep(1000);
         }
     }
 
@@ -152,13 +151,13 @@ public class RedPosTwoOnlyParkCorner extends LinearOpMode{
                 targetAngle += 360;
             }
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-targetAngle)>=4) {
+                robot.checkPower(-.1, .1);
                 basicTel();
                 idle();
             }
             robot.setMotorPower(0,0);
             robot.resetEncoders();
 
-            sleep(1000);
         }
     }
 
@@ -175,14 +174,21 @@ public class RedPosTwoOnlyParkCorner extends LinearOpMode{
             robot.setToWOEncoderMode();
             if (robot.gyro.getHeading()>angle){
                 robot.setMotorPower(-.1,.1);
+                while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-angle)>=3) {
+                    robot.checkPower(-.1, .1);
+                    basicTel();
+                    idle();
+                }
             }
             else{
                 robot.setMotorPower(.1, -.1);
+                while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-angle)>=3) {
+                    robot.checkPower(.1, -.1);
+                    basicTel();
+                    idle();
+                }
             }
-            while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-angle)>=3) {
-                basicTel();
-                idle();
-            }
+
             robot.setMotorPower(0,0);
             robot.resetEncoders();
             sleep(500);
@@ -200,6 +206,7 @@ public class RedPosTwoOnlyParkCorner extends LinearOpMode{
     public boolean hasReached() {
         return (Math.abs(robot.frontLeft.getCurrentPosition() - leftTarget) <= TOLERANCE &&
                 Math.abs(robot.backLeft.getCurrentPosition() - leftTarget) <= TOLERANCE &&
+                Math.abs(robot.frontRight.getCurrentPosition() - rightTarget) <= TOLERANCE &&
                 Math.abs(robot.backRight.getCurrentPosition() - rightTarget) <= TOLERANCE);
     }
 

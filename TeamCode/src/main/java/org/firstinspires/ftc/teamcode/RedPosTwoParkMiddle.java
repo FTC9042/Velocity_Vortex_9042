@@ -85,7 +85,6 @@ public class RedPosTwoParkMiddle extends LinearOpMode{
 
     }
 
-
     //ENCODER BASED MOVEMENT
     public void runStraight(double distance_in_inches, int timeoutS) throws InterruptedException{
         if (opModeIsActive()){
@@ -96,11 +95,13 @@ public class RedPosTwoParkMiddle extends LinearOpMode{
             runtime.reset();
             robot.setMotorPower(.4,.4);
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && !hasReached()) {
+                robot.checkPower(.4, .4);
                 basicTel();
                 idle();
             }
             robot.setMotorPower(0,0);
             robot.resetEncoders();
+            sleep(1000);
         }
     }
 
@@ -115,6 +116,7 @@ public class RedPosTwoParkMiddle extends LinearOpMode{
                 targetAngle-=360;
             }
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-targetAngle)>=4) {
+                robot.checkPower(.1, -.1);
                 basicTel();
                 idle();
             }
@@ -134,6 +136,7 @@ public class RedPosTwoParkMiddle extends LinearOpMode{
                 targetAngle += 360;
             }
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-targetAngle)>=4) {
+                robot.checkPower(-.1, .1);
                 basicTel();
                 idle();
             }
@@ -154,11 +157,23 @@ public class RedPosTwoParkMiddle extends LinearOpMode{
         if (opModeIsActive()){
             runtime.reset();
             robot.setToWOEncoderMode();
-            robot.setMotorPower(-.1,.1);
-            while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-angle)>=2) {
-                basicTel();
-                idle();
+            if (robot.gyro.getHeading()>angle){
+                robot.setMotorPower(-.1,.1);
+                while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-angle)>=3) {
+                    robot.checkPower(-.1, .1);
+                    basicTel();
+                    idle();
+                }
             }
+            else{
+                robot.setMotorPower(.1, -.1);
+                while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-angle)>=3) {
+                    robot.checkPower(.1, -.1);
+                    basicTel();
+                    idle();
+                }
+            }
+
             robot.setMotorPower(0,0);
             robot.resetEncoders();
             sleep(500);
@@ -189,5 +204,4 @@ public class RedPosTwoParkMiddle extends LinearOpMode{
         telemetry.addData("Colors","Red is %d and Blue is %d", robot.color.red(), robot.color.blue());
         telemetry.update();
     }
-
 }

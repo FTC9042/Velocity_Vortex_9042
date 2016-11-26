@@ -36,16 +36,16 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-/*Position one is with the back left wheel touching the wall at the first crack between two mats
-Parallel to the midway line
-*/
+//Back left wheel is on the second crack away from the corner vortex on driver side
+//Flush against wall
 
-@Autonomous(name="Red Pos1: Park Partial Corner", group="Red Position 1")
+@Autonomous(name="Square!", group="Tests")
 //@Disabled
-public class RedPosOneParkCorner extends LinearOpMode{
+public class SquareTest extends LinearOpMode{
 
     Robot robot   = new Robot();
     private ElapsedTime     runtime = new ElapsedTime();
+    private ElapsedTime     elapsed;
 
     //encoder targets
     private int rightTarget,
@@ -62,6 +62,7 @@ public class RedPosOneParkCorner extends LinearOpMode{
     public void runOpMode() throws InterruptedException {
 
         robot.init(hardwareMap);
+        robot.color.enableLed(true);
 
         robot.resetGyro();
         robot.setDirection();
@@ -77,36 +78,52 @@ public class RedPosOneParkCorner extends LinearOpMode{
         telemetry.update();
 
         waitForStart();
+        elapsed = new ElapsedTime();
 
-        telemetry.addData("Status", "Forward 62 Inches");
-        telemetry.update();
-        runStraight(62, 10);
-        telemetry.addData("Status", "Turn left 70 degrees");
-        telemetry.update();
-        turnLeft(60, 10);
-        telemetry.addData("Status", "Forward 65 Inches");
-        telemetry.update();
-        runStraight(50,10);
-
+        while (opModeIsActive()){
+            for (int i = 0; i<4; i++) {
+                sleep(250);
+                runStraight(15, 1000000, .4);
+                sleep(250);
+                turnLeft(90, 1000000);
+            }
+        }
     }
     //ENCODER BASED MOVEMENT
-    public void runStraight(double distance_in_inches, int timeoutS) throws InterruptedException{
+    public void runStraight(double distance_in_inches, int timeoutS, double speed) throws InterruptedException{
         if (opModeIsActive()){
             leftTarget = (int) (distance_in_inches * TICKS_PER_INCH);
             rightTarget = leftTarget;
+            robot.resetEncoders();
             robot.setToEncoderMode();
             setTargetValueMotor();
             runtime.reset();
-            robot.setMotorPower(.4,.4);
+//            robot.setMotorPower(speed,speed);
+            robot.backLeft.setPower(speed);
+            robot.frontLeft.setPower(speed);
+            robot.backRight.setPower(speed);
+            robot.frontRight.setPower(speed);
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && !hasReached()) {
-                robot.checkPower(.4, .4);
                 basicTel();
+                checkSpeed(speed);
                 idle();
             }
             robot.setMotorPower(0,0);
             robot.resetEncoders();
-            sleep(1000);
         }
+    }
+
+    public boolean isColorRed(){
+        if (robot.color.red()>robot.color.blue() && robot.color.red()>=1){
+            telemetry.addData("Colors","Red is %d and Blue is %d", robot.color.red(), robot.color.blue());
+            telemetry.addData("Course","The color detected was red");
+            telemetry.update();
+            return true;
+        }
+        telemetry.addData("Colors","Red is %d and Blue is %d", robot.color.red(), robot.color.blue());
+        telemetry.addData("Course","The color detected was blue");
+        telemetry.update();
+        return false;
     }
 
     //Turning With Gyro's
@@ -114,13 +131,13 @@ public class RedPosOneParkCorner extends LinearOpMode{
         if (opModeIsActive()){
             robot.setToWOEncoderMode();
             runtime.reset();
-            robot.setMotorPower(.1,-.1);
+            robot.setMotorPower(.13,-.13);
             int targetAngle = robot.gyro.getHeading()+angle;
             if (targetAngle>=360){
                 targetAngle-=360;
             }
-            while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-targetAngle)>=4) {
-                robot.checkPower(.1, -.1);
+            while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-targetAngle)>=1) {
+                checkSpeed(.13);
                 basicTel();
                 idle();
             }
@@ -134,19 +151,23 @@ public class RedPosOneParkCorner extends LinearOpMode{
         if (opModeIsActive()){
             robot.setToWOEncoderMode();
             runtime.reset();
-            robot.setMotorPower(-.1,.1);
+//            robot.setMotorPower(-.13,.13);
+            robot.backLeft.setPower(-.13);
+            robot.frontLeft.setPower(-.13);
+            robot.backRight.setPower(.13);
+            robot.frontRight.setPower(.13);
             int targetAngle = robot.gyro.getHeading()-angle;
             if (targetAngle<0){
                 targetAngle += 360;
             }
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-targetAngle)>=4) {
-                robot.checkPower(-.1, .1);
+                checkSpeed(.13);
                 basicTel();
                 idle();
             }
             robot.setMotorPower(0,0);
             robot.resetEncoders();
-
+            robot.setToWOEncoderMode();
         }
     }
 
@@ -154,6 +175,8 @@ public class RedPosOneParkCorner extends LinearOpMode{
         runtime.reset();
         while (opModeIsActive() && runtime.seconds() < timeoutS){
             robot.roller.setPower(1);
+
+            idle();
         }
     }
 
@@ -163,24 +186,16 @@ public class RedPosOneParkCorner extends LinearOpMode{
             robot.setToWOEncoderMode();
             if (robot.gyro.getHeading()>angle){
                 robot.setMotorPower(-.1,.1);
-                while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-angle)>=3) {
-                    robot.checkPower(-.1, .1);
-                    basicTel();
-                    idle();
-                }
             }
             else{
                 robot.setMotorPower(.1, -.1);
-                while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-angle)>=3) {
-                    robot.checkPower(.1, -.1);
-                    basicTel();
-                    idle();
-                }
             }
-
+            while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-angle)>=3) {
+                basicTel();
+                idle();
+            }
             robot.setMotorPower(0,0);
             robot.resetEncoders();
-            sleep(500);
         }
     }
 
@@ -199,13 +214,29 @@ public class RedPosOneParkCorner extends LinearOpMode{
                 Math.abs(robot.backRight.getCurrentPosition() - rightTarget) <= TOLERANCE);
     }
 
+    public void checkSpeed(double speed){
+        if (robot.backLeft.getPower()!=speed){
+            robot.backLeft.setPower(speed);
+        }
+        if (robot.frontLeft.getPower()!=speed){
+            robot.frontLeft.setPower(speed);
+        }
+        if (robot.backRight.getPower()!=speed){
+            robot.backRight.setPower(speed);
+        }
+        if (robot.frontRight.getPower()!=speed){
+            robot.frontRight.setPower(speed);
+        }
+    }
+
     public void basicTel(){
-        telemetry.addData("Back Right Motor", "Target %7d: Current Pos %7d", robot.backRight.getTargetPosition(), robot.backRight.getCurrentPosition());
-        telemetry.addData("Front Right Motor", "Target %7d: Current Pos %7d", robot.frontRight.getTargetPosition(), robot.frontRight.getCurrentPosition());
-        telemetry.addData("Back Left Motor", "Target %7d: Current Pos %7d", robot.backLeft.getTargetPosition(), robot.backLeft.getCurrentPosition());
-        telemetry.addData("Front Left Motor", "Target %7d: Current Pos %7d", robot.frontLeft.getTargetPosition(), robot.frontLeft.getCurrentPosition());
+        telemetry.addData("Back Right Motor", "Target %7d: Current Pos %7d: Power %2f", robot.backRight.getTargetPosition(), robot.backRight.getCurrentPosition(),robot.backRight.getPower());
+        telemetry.addData("Front Right Motor", "Target %7d: Current Pos %7d: Power %2f", robot.frontRight.getTargetPosition(), robot.frontRight.getCurrentPosition(), robot.frontRight.getPower());
+        telemetry.addData("Back Left Motor", "Target %7d: Current Pos %7d: Power %2f", robot.backLeft.getTargetPosition(), robot.backLeft.getCurrentPosition(),robot.frontLeft.getPower());
+        telemetry.addData("Front Left Motor", "Target %7d: Current Pos %7d: Power %2f", robot.frontLeft.getTargetPosition(), robot.frontLeft.getCurrentPosition(),robot.backLeft.getPower());
         telemetry.addData("Gyro", "Robot is facing %d",robot.gyro.getHeading());
         telemetry.addData("Colors","Red is %d and Blue is %d", robot.color.red(), robot.color.blue());
+        telemetry.addData("Time", "Total Elapsed time is %.2f", elapsed.seconds());
         telemetry.update();
     }
 }

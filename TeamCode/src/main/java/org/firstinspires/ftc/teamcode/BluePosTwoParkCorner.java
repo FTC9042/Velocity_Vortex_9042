@@ -114,9 +114,8 @@ public class BluePosTwoParkCorner extends LinearOpMode{
             runtime.reset();
             robot.setMotorPower(.4,.4);
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && !hasReached()) {
+                robot.checkPower(.4, .4);
                 basicTel();
-
-                // Allow time for other processes to run.
                 idle();
             }
             robot.setMotorPower(0,0);
@@ -136,6 +135,7 @@ public class BluePosTwoParkCorner extends LinearOpMode{
                 targetAngle-=360;
             }
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-targetAngle)>=4) {
+                robot.checkPower(.1, -.1);
                 basicTel();
                 idle();
             }
@@ -149,12 +149,13 @@ public class BluePosTwoParkCorner extends LinearOpMode{
         if (opModeIsActive()){
             robot.setToWOEncoderMode();
             runtime.reset();
-            robot.setMotorPower(-.12,.12);
+            robot.setMotorPower(-.1,.1);
             int targetAngle = robot.gyro.getHeading()-angle;
             if (targetAngle<0){
                 targetAngle += 360;
             }
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-targetAngle)>=4) {
+                robot.checkPower(-.1, .1);
                 basicTel();
                 idle();
             }
@@ -177,14 +178,21 @@ public class BluePosTwoParkCorner extends LinearOpMode{
             robot.setToWOEncoderMode();
             if (robot.gyro.getHeading()>angle){
                 robot.setMotorPower(-.1,.1);
+                while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-angle)>=3) {
+                    robot.checkPower(-.1, .1);
+                    basicTel();
+                    idle();
+                }
             }
             else{
                 robot.setMotorPower(.1, -.1);
+                while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-angle)>=3) {
+                    robot.checkPower(.1, -.1);
+                    basicTel();
+                    idle();
+                }
             }
-            while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-angle)>=3) {
-                basicTel();
-                idle();
-            }
+
             robot.setMotorPower(0,0);
             robot.resetEncoders();
             sleep(500);

@@ -36,16 +36,16 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-/*Position one is with the back left wheel touching the wall at the first crack between two mats
-Parallel to the midway line
-*/
+//Back left wheel is on the second crack away from the corner vortex on driver side
+//Flush against wall
 
-@Autonomous(name="Red Pos1: Park Partial Corner", group="Red Position 1")
+@Autonomous(name="Red Pos2: BEACON(S) Sinle Push!", group="Red Position 2")
 //@Disabled
-public class RedPosOneParkCorner extends LinearOpMode{
+public class RedPosTwoBeaconsSinglePush extends LinearOpMode{
 
     Robot robot   = new Robot();
     private ElapsedTime     runtime = new ElapsedTime();
+    private ElapsedTime     elapsed;
 
     //encoder targets
     private int rightTarget,
@@ -62,6 +62,7 @@ public class RedPosOneParkCorner extends LinearOpMode{
     public void runOpMode() throws InterruptedException {
 
         robot.init(hardwareMap);
+        robot.color.enableLed(false);
 
         robot.resetGyro();
         robot.setDirection();
@@ -77,36 +78,85 @@ public class RedPosOneParkCorner extends LinearOpMode{
         telemetry.update();
 
         waitForStart();
+        elapsed = new ElapsedTime();
 
-        telemetry.addData("Status", "Forward 62 Inches");
-        telemetry.update();
-        runStraight(62, 10);
-        telemetry.addData("Status", "Turn left 70 degrees");
-        telemetry.update();
-        turnLeft(60, 10);
-        telemetry.addData("Status", "Forward 65 Inches");
-        telemetry.update();
-        runStraight(50,10);
+        runStraight(20, 10, 1);
+        turnLeft(45, 10);
+        runStraight(62, 10, 1);
+        turnTowards(270, 5);
+        runStraight(10, 4, 1);
+        if (isColorRed()) {
+            turnTowards(273, 3);
+        }
+        runStraight(3, 1, 1);
+        runStraight(-2, 1, 1);
+        sleep(250);
+        if (!isColorRed()){
+            sleep(4700);
+            runStraight(3, 1, 1);
+        }
+        runStraight(-2, 1, 1);
+        turnTowards(270, 1);
+        runStraight(-8, 3, 1);
+
+        if (elapsed.seconds()<17) {
+            turnRight(90,5);
+            turnTowards(0, 2);
+            runStraight(41, 5, 1);
+            turnLeft(90, 5);
+            turnTowards(270, 5);
+            if (elapsed.seconds() < 23) {
+                runStraight(15, 2, .6);
+                runStraight(-2, 1, .8);
+                sleep(250);
+                if (!isColorRed()) {
+                    sleep(4700);
+                    runStraight(3, 1, .4);
+                }
+            }
+        }
+        else{
+            turnRight(45, 5);
+            runStraight(-24, 4, 1);
+            turnTowards(230, 5);
+            runStraight(29, 4, 1);
+            robot.roller.setPower(1);
+            runStraight(4, 5, 1);
+            rollout(10);
+        }
 
     }
     //ENCODER BASED MOVEMENT
-    public void runStraight(double distance_in_inches, int timeoutS) throws InterruptedException{
+    public void runStraight(double distance_in_inches, int timeoutS, double speed) throws InterruptedException{
         if (opModeIsActive()){
             leftTarget = (int) (distance_in_inches * TICKS_PER_INCH);
             rightTarget = leftTarget;
             robot.setToEncoderMode();
             setTargetValueMotor();
             runtime.reset();
-            robot.setMotorPower(.4,.4);
+            robot.setMotorPower(speed,speed);
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && !hasReached()) {
-                robot.checkPower(.4, .4);
+                robot.checkPower(speed, speed);
                 basicTel();
                 idle();
             }
             robot.setMotorPower(0,0);
             robot.resetEncoders();
-            sleep(1000);
+            sleep(500);
         }
+    }
+
+    public boolean isColorRed(){
+        if (robot.color.red()>robot.color.blue() && robot.color.red()>=1){
+            telemetry.addData("Colors","Red is %d and Blue is %d", robot.color.red(), robot.color.blue());
+            telemetry.addData("Course","The color detected was red");
+            telemetry.update();
+            return true;
+        }
+        telemetry.addData("Colors","Red is %d and Blue is %d", robot.color.red(), robot.color.blue());
+        telemetry.addData("Course","The color detected was blue");
+        telemetry.update();
+        return false;
     }
 
     //Turning With Gyro's
@@ -114,18 +164,19 @@ public class RedPosOneParkCorner extends LinearOpMode{
         if (opModeIsActive()){
             robot.setToWOEncoderMode();
             runtime.reset();
-            robot.setMotorPower(.1,-.1);
+            robot.setMotorPower(.13,-.13);
             int targetAngle = robot.gyro.getHeading()+angle;
             if (targetAngle>=360){
                 targetAngle-=360;
             }
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-targetAngle)>=4) {
-                robot.checkPower(.1, -.1);
+                robot.checkPower(.13, -.13);
                 basicTel();
                 idle();
             }
             robot.setMotorPower(0,0);
             robot.resetEncoders();
+            sleep(500);
         }
     }
 
@@ -134,19 +185,19 @@ public class RedPosOneParkCorner extends LinearOpMode{
         if (opModeIsActive()){
             robot.setToWOEncoderMode();
             runtime.reset();
-            robot.setMotorPower(-.1,.1);
+            robot.setMotorPower(-.13,.13);
             int targetAngle = robot.gyro.getHeading()-angle;
             if (targetAngle<0){
                 targetAngle += 360;
             }
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-targetAngle)>=4) {
-                robot.checkPower(-.1, .1);
+                robot.checkPower(-.13, .13);
                 basicTel();
                 idle();
             }
             robot.setMotorPower(0,0);
             robot.resetEncoders();
-
+            sleep(500);
         }
     }
 
@@ -154,6 +205,7 @@ public class RedPosOneParkCorner extends LinearOpMode{
         runtime.reset();
         while (opModeIsActive() && runtime.seconds() < timeoutS){
             robot.roller.setPower(1);
+            idle();
         }
     }
 
@@ -177,7 +229,6 @@ public class RedPosOneParkCorner extends LinearOpMode{
                     idle();
                 }
             }
-
             robot.setMotorPower(0,0);
             robot.resetEncoders();
             sleep(500);
@@ -206,6 +257,7 @@ public class RedPosOneParkCorner extends LinearOpMode{
         telemetry.addData("Front Left Motor", "Target %7d: Current Pos %7d", robot.frontLeft.getTargetPosition(), robot.frontLeft.getCurrentPosition());
         telemetry.addData("Gyro", "Robot is facing %d",robot.gyro.getHeading());
         telemetry.addData("Colors","Red is %d and Blue is %d", robot.color.red(), robot.color.blue());
+        telemetry.addData("Time", "Total Elapsed time is %.2f", elapsed.seconds());
         telemetry.update();
     }
 }

@@ -86,17 +86,6 @@ public class BasicTeleOp extends OpMode {
             robot.roller.setPower(0);
         }
 
-        //Beacon Booper Manipulation
-        if (gamepad2.dpad_left){
-            robot.booper.setPosition(1);
-        }
-        else if (gamepad2.dpad_right){
-            robot.booper.setPosition(0);
-        }
-        else if (gamepad2.b){
-            robot.booper.setPosition(.5);
-        }
-
 
         //Return Encoder Values
         telemetry.addData("Left Back Encoder", "Value is "+robot.backLeft.getCurrentPosition());

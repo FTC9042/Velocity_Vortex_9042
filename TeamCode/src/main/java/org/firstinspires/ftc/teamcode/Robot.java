@@ -2,10 +2,8 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.GyroSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -21,7 +19,7 @@ public class Robot
 
     ColorSensor color;
 
-    Servo booper;
+    TouchSensor bumper;
 
 
     /* Local OpMode members. */
@@ -50,9 +48,7 @@ public class Robot
         //Sensors
         gyro = hardwareMap.gyroSensor.get("gyro");
         color = hardwareMap.colorSensor.get("color");
-
-        //Servos
-        booper = hardwareMap.servo.get("beacon");
+        bumper = hardwareMap.touchSensor.get("bumper");
 
 
 
@@ -89,7 +85,10 @@ public class Robot
      * Sets all motors to RUN_TO_POSITION mode
      */
     public void setToEncoderMode() {
-        setMotorMode(DcMotor.RunMode.RUN_TO_POSITION);
+        frontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        frontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
 
     /**
@@ -101,13 +100,21 @@ public class Robot
     /**
      * Sets all motors to RUN_WITHOUT_ENCODER mode
      */
-    public void setToWOEncoderMode() {setMotorMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER); }
+    public void setToWOEncoderMode() {
+        frontLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        backRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }
 
     /**
      * Sets all motors to RUN_USING_ENCODER mode
      */
     public void resetEncoders() {
-        setMotorMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     }
 
 
@@ -127,12 +134,12 @@ public class Robot
      *
      * @param runMode runMode to be set
      */
-    public void setMotorMode(DcMotor.RunMode runMode) {
-        backLeft.setMode(runMode);
-        backRight.setMode(runMode);
-        frontRight.setMode(runMode);
-        frontLeft.setMode(runMode);
-    }
+//    public void setMotorMode(DcMotor.RunMode runMode) {
+//        backLeft.setMode(runMode);
+//        backRight.setMode(runMode);
+//        frontRight.setMode(runMode);
+//        frontLeft.setMode(runMode);
+//    }
 
     /**
      * Drives the motors with the specified power levels
@@ -161,6 +168,21 @@ public class Robot
 
         frontLeft.setMaxSpeed(speed);
         frontRight.setMaxSpeed(speed);
+    }
+
+    public void checkPower(double rightSide, double leftSide){
+        if (backLeft.getPower()!=leftSide){
+            backLeft.setPower(leftSide);
+        }
+        if (frontLeft.getPower()!=leftSide){
+            frontLeft.setPower(leftSide);
+        }
+        if (backRight.getPower()!=rightSide){
+            backRight.setPower(rightSide);
+        }
+        if (frontRight.getPower()!=rightSide){
+            frontRight.setPower(rightSide);
+        }
     }
 
 }

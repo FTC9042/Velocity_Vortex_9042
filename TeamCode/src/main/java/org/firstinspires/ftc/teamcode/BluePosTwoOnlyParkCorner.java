@@ -108,7 +108,6 @@ public class BluePosTwoOnlyParkCorner extends LinearOpMode{
         telemetry.update();
         rollout(10);
     }
-
     //ENCODER BASED MOVEMENT
     public void runStraight(double distance_in_inches, int timeoutS) throws InterruptedException{
         if (opModeIsActive()){
@@ -117,8 +116,9 @@ public class BluePosTwoOnlyParkCorner extends LinearOpMode{
             robot.setToEncoderMode();
             setTargetValueMotor();
             runtime.reset();
-            robot.setMotorPower(.5 , .5);
+            robot.setMotorPower(.4,.4);
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && !hasReached()) {
+                robot.checkPower(.4, .4);
                 basicTel();
                 idle();
             }
@@ -133,12 +133,13 @@ public class BluePosTwoOnlyParkCorner extends LinearOpMode{
         if (opModeIsActive()){
             robot.setToWOEncoderMode();
             runtime.reset();
-            robot.setMotorPower(.1 , -.1);
+            robot.setMotorPower(.1,-.1);
             int targetAngle = robot.gyro.getHeading()+angle;
             if (targetAngle>=360){
                 targetAngle-=360;
             }
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-targetAngle)>=4) {
+                robot.checkPower(.1, -.1);
                 basicTel();
                 idle();
             }
@@ -158,6 +159,7 @@ public class BluePosTwoOnlyParkCorner extends LinearOpMode{
                 targetAngle += 360;
             }
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-targetAngle)>=4) {
+                robot.checkPower(-.1, .1);
                 basicTel();
                 idle();
             }
@@ -180,14 +182,21 @@ public class BluePosTwoOnlyParkCorner extends LinearOpMode{
             robot.setToWOEncoderMode();
             if (robot.gyro.getHeading()>angle){
                 robot.setMotorPower(-.1,.1);
+                while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-angle)>=3) {
+                    robot.checkPower(-.1, .1);
+                    basicTel();
+                    idle();
+                }
             }
             else{
                 robot.setMotorPower(.1, -.1);
+                while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-angle)>=3) {
+                    robot.checkPower(.1, -.1);
+                    basicTel();
+                    idle();
+                }
             }
-            while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-angle)>=3) {
-                basicTel();
-                idle();
-            }
+
             robot.setMotorPower(0,0);
             robot.resetEncoders();
             sleep(500);
@@ -208,6 +217,7 @@ public class BluePosTwoOnlyParkCorner extends LinearOpMode{
                 Math.abs(robot.frontRight.getCurrentPosition() - rightTarget) <= TOLERANCE &&
                 Math.abs(robot.backRight.getCurrentPosition() - rightTarget) <= TOLERANCE);
     }
+
     public void basicTel(){
         telemetry.addData("Back Right Motor", "Target %7d: Current Pos %7d", robot.backRight.getTargetPosition(), robot.backRight.getCurrentPosition());
         telemetry.addData("Front Right Motor", "Target %7d: Current Pos %7d", robot.frontRight.getTargetPosition(), robot.frontRight.getCurrentPosition());
