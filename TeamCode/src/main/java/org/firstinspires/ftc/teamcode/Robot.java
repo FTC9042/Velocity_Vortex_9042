@@ -170,7 +170,7 @@ public class Robot
         frontRight.setMaxSpeed(speed);
     }
 
-    public void checkPower(double rightSide, double leftSide){
+    public void checkPower(double leftSide, double rightSide){
         if (backLeft.getPower()!=leftSide){
             backLeft.setPower(leftSide);
         }

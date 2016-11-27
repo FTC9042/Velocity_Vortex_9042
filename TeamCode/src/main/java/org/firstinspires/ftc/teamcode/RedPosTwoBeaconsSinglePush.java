@@ -39,7 +39,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 //Back left wheel is on the second crack away from the corner vortex on driver side
 //Flush against wall
 
-@Autonomous(name="Red Pos2: BEACON(S) Sinle Push!", group="Red Position 2")
+@Autonomous(name="Red Pos2: BEACON(S) Single Push!", group="Red Position 2")
 //@Disabled
 public class RedPosTwoBeaconsSinglePush extends LinearOpMode{
 
@@ -67,9 +67,9 @@ public class RedPosTwoBeaconsSinglePush extends LinearOpMode{
         robot.resetGyro();
         robot.setDirection();
         robot.resetEncoders();
-        telemetry.addData("Status", "Resetting Encoders | Left:"+ robot.backLeft.getCurrentPosition()+" Right:"+robot.backRight.getCurrentPosition());
-        while (robot.gyro.isCalibrating() && !opModeIsActive()){
-            telemetry.addData("Status", "Gyro is Resetting. Currently at "+ robot.gyro.getHeading());
+        telemetry.addData("Status", "Resetting Encoders | Left:" + robot.backLeft.getCurrentPosition() + " Right:" + robot.backRight.getCurrentPosition());
+        while (robot.gyro.isCalibrating() && !opModeIsActive()) {
+            telemetry.addData("Status", "Gyro is Resetting. Currently at " + robot.gyro.getHeading());
             telemetry.update();
 
             idle();
@@ -80,51 +80,64 @@ public class RedPosTwoBeaconsSinglePush extends LinearOpMode{
         waitForStart();
         elapsed = new ElapsedTime();
 
-        runStraight(20, 10, 1);
+        runStraight(20, 10, .7);
         turnLeft(45, 10);
-        runStraight(62, 10, 1);
+        runStraight(54, 10, .7);
+        turnLeft(45, 3);
         turnTowards(270, 5);
-        runStraight(10, 4, 1);
-        if (isColorRed()) {
-            turnTowards(273, 3);
+        runStraight(16, 4, .6);
+        if (isColorRed()){
+            turnTowards(274, 3);
+//            turnTowards(275, 3);
         }
-        runStraight(3, 1, 1);
-        runStraight(-2, 1, 1);
-        sleep(250);
-        if (!isColorRed()){
-            sleep(4700);
-            runStraight(3, 1, 1);
+        else{
+//            turnTowards(265, 3);
+            turnTowards(266, 3);
         }
-        runStraight(-2, 1, 1);
+        runStraight(4, 1, .3);
+        runStraight(-2, 1, .3);
+        if (!isColorRed()) {
+            sleep(4900);
+            runStraight(3, 1, .6);
+        }
         turnTowards(270, 1);
-        runStraight(-8, 3, 1);
+        runStraight(-10, 3, .6);
 
-        if (elapsed.seconds()<17) {
-            turnRight(90,5);
+        if (elapsed.seconds() < 17) {
+            turnRight(90, 5);
             turnTowards(0, 2);
-            runStraight(41, 5, 1);
+            runStraight(48, 5, .6);
             turnLeft(90, 5);
             turnTowards(270, 5);
             if (elapsed.seconds() < 23) {
-                runStraight(15, 2, .6);
-                runStraight(-2, 1, .8);
-                sleep(250);
-                if (!isColorRed()) {
-                    sleep(4700);
-                    runStraight(3, 1, .4);
+                runStraight(11, 2, .4);
+                if (isColorRed()){
+                    turnTowards(275, 3);
                 }
+                else{
+                    turnTowards(265, 3);
+                }
+                runStraight(4, 1, .3);
+                runStraight(-2, 1, .3);
+                if (!isColorRed()) {
+                    sleep(4900);
+                    runStraight(3, 1, .3);
+                }
+                runStraight(-2, 1, 1);
+                turnRight(45, 3);
+                runStraight(-40, 5, 1);
             }
         }
-        else{
+
+        else {
             turnRight(45, 5);
-            runStraight(-24, 4, 1);
+            runStraight(-24, 4, .6);
             turnTowards(230, 5);
-            runStraight(29, 4, 1);
+            runStraight(29, 4, .6);
             robot.roller.setPower(1);
-            runStraight(4, 5, 1);
+            runStraight(4, 5, .6);
             rollout(10);
         }
-
     }
     //ENCODER BASED MOVEMENT
     public void runStraight(double distance_in_inches, int timeoutS, double speed) throws InterruptedException{
@@ -142,7 +155,7 @@ public class RedPosTwoBeaconsSinglePush extends LinearOpMode{
             }
             robot.setMotorPower(0,0);
             robot.resetEncoders();
-            sleep(500);
+            sleep(250);
         }
     }
 
@@ -176,7 +189,6 @@ public class RedPosTwoBeaconsSinglePush extends LinearOpMode{
             }
             robot.setMotorPower(0,0);
             robot.resetEncoders();
-            sleep(500);
         }
     }
 
@@ -197,7 +209,6 @@ public class RedPosTwoBeaconsSinglePush extends LinearOpMode{
             }
             robot.setMotorPower(0,0);
             robot.resetEncoders();
-            sleep(500);
         }
     }
 
@@ -231,7 +242,6 @@ public class RedPosTwoBeaconsSinglePush extends LinearOpMode{
             }
             robot.setMotorPower(0,0);
             robot.resetEncoders();
-            sleep(500);
         }
     }
 
