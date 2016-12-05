@@ -1,3 +1,35 @@
+/*
+Copyright (c) 2016 Robert Atkinson
+
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification,
+are permitted (subject to the limitations in the disclaimer below) provided that
+the following conditions are met:
+
+Redistributions of source code must retain the above copyright notice, this list
+of conditions and the following disclaimer.
+
+Redistributions in binary form must reproduce the above copyright notice, this
+list of conditions and the following disclaimer in the documentation and/or
+other materials provided with the distribution.
+
+Neither the name of Robert Atkinson nor the names of his contributors may be used to
+endorse or promote products derived from this software without specific prior
+written permission.
+
+NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY THIS
+LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESSFOR A PARTICULAR PURPOSE
+ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
+TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -7,9 +39,9 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 //Back left wheel is on the second crack away from the corner vortex on driver side
 //Flush against wall
 
-@Autonomous(name="Red Pos2: BEACON(S) Single Push!", group="Red Position 2")
+@Autonomous(name="Red Pos3: BEACON(S) ONE PUSH ONLY!", group="Red Position 3")
 //@Disabled
-public class RedPosTwoBeaconsSinglePush extends LinearOpMode{
+public class RedPosThreeBeaconsSinglePush extends LinearOpMode{
 
     Robot robot   = new Robot();
     private ElapsedTime     runtime = new ElapsedTime();
@@ -31,13 +63,14 @@ public class RedPosTwoBeaconsSinglePush extends LinearOpMode{
 
         robot.init(hardwareMap);
         robot.color.enableLed(false);
+        robot.color.enableLed(true);
 
         robot.resetGyro();
         robot.setDirection();
         robot.resetEncoders();
-        telemetry.addData("Status", "Resetting Encoders | Left:" + robot.backLeft.getCurrentPosition() + " Right:" + robot.backRight.getCurrentPosition());
-        while (robot.gyro.isCalibrating() && !opModeIsActive()) {
-            telemetry.addData("Status", "Gyro is Resetting. Currently at " + robot.gyro.getHeading());
+        telemetry.addData("Status", "Resetting Encoders | Left:"+ robot.backLeft.getCurrentPosition()+" Right:"+robot.backRight.getCurrentPosition());
+        while (robot.gyro.isCalibrating() && !opModeIsActive()){
+            telemetry.addData("Status", "Gyro is Resetting. Currently at "+ robot.gyro.getHeading());
             telemetry.update();
 
             idle();
@@ -48,35 +81,38 @@ public class RedPosTwoBeaconsSinglePush extends LinearOpMode{
         waitForStart();
         elapsed = new ElapsedTime();
 
-        runStraight(19, 10, .7);
+        runStraight(10, 10, .4);
         turnLeft(45, 10);
-        runStraight(53, 10, .7);
-        turnLeft(45, 3);
-        turnTowards(270, 5);
-        runStraight(17, 4, .6);
+        runStraight(39, 5, .6);
+        turnRight(45, 10);
+        turnTowards(0, 3);
+        runStraight(2, 1, .4);
+        turnLeft(90, 2);
+        runStraight(9, 3, .5);
         if (isColorRed()){
             turnTowards(274, 3);
+//            turnTowards(275, 3);
         }
         else{
+//            turnTowards(265, 3);
             turnTowards(266, 3);
         }
         runStraight(4, 1, .3);
-        runStraight(-3, 1, .3);
-        turnTowards(270, 1);
-        if (!isColorRed()) {
-            sleep(4900);
-            runStraight(3, 1, .6);
+        runStraight(-3, 1, .4);
+        if (!isColorRed()){
+            sleep(5000);
+            runStraight(3, 1, .4);
         }
+        turnTowards(270, 1);
         runStraight(-10, 3, .6);
 
         if (elapsed.seconds() < 17) {
-            turnRight(95, 5);
+            turnRight(90, 5);
             turnTowards(0, 2);
-            runStraight(47, 5, .6);
-            turnLeft(87, 5);
+            turnLeft(90, 5);
             turnTowards(270, 5);
-            if (elapsed.seconds() < 25) {
-                runStraight(14, 2, .4);
+            if (elapsed.seconds() < 23) {
+                runStraight(11, 2, .4);
                 if (isColorRed()){
                     turnTowards(274, 3);
                 }
@@ -84,27 +120,19 @@ public class RedPosTwoBeaconsSinglePush extends LinearOpMode{
                     turnTowards(266, 3);
                 }
                 runStraight(4, 1, .3);
-                runStraight(-2, 1, 1);
+                runStraight(-2, 1, .3);
                 if (!isColorRed()) {
                     sleep(4900);
                     runStraight(3, 1, .3);
                 }
-                turnRightSUPERFAST(30, 3);
-                robot.setToCoast();
-                runStraight(-80, 6, 1);
+                runStraight(-2, 1, 1);
+                turnRight(45, 3);
+                runStraight(-40, 5, 1);
             }
         }
 
-        else {
-            turnRight(45, 5);
-            runStraight(-24, 4, .6);
-            turnLeft(90, 3);
-            turnTowards(230, 5);
-            runStraight(29, 4, .6);
-            robot.roller.setPower(1);
-            runStraight(4, 5, .6);
-            rollout(10);
-        }
+
+
     }
     //ENCODER BASED MOVEMENT
     public void runStraight(double distance_in_inches, int timeoutS, double speed) throws InterruptedException{
@@ -116,13 +144,11 @@ public class RedPosTwoBeaconsSinglePush extends LinearOpMode{
             runtime.reset();
             robot.setMotorPower(speed,speed);
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && !hasReached()) {
-                robot.checkPower(speed, speed);
                 basicTel();
                 idle();
             }
             robot.setMotorPower(0,0);
             robot.resetEncoders();
-            sleep(250);
         }
     }
 
@@ -150,27 +176,6 @@ public class RedPosTwoBeaconsSinglePush extends LinearOpMode{
                 targetAngle-=360;
             }
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-targetAngle)>=4) {
-                robot.checkPower(.13, -.13);
-                basicTel();
-                idle();
-            }
-            robot.setMotorPower(0,0);
-            robot.resetEncoders();
-        }
-    }
-
-    //Turning With Gyro's
-    public void turnRightSUPERFAST(int angle, int timeoutS) throws InterruptedException{
-        if (opModeIsActive()){
-            robot.setToWOEncoderMode();
-            runtime.reset();
-            robot.setMotorPower(.4,-.4);
-            int targetAngle = robot.gyro.getHeading()+angle;
-            if (targetAngle>=360){
-                targetAngle-=360;
-            }
-            while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-targetAngle)>=10) {
-                robot.checkPower(.4, -.4);
                 basicTel();
                 idle();
             }
@@ -190,21 +195,23 @@ public class RedPosTwoBeaconsSinglePush extends LinearOpMode{
                 targetAngle += 360;
             }
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-targetAngle)>=4) {
-                robot.checkPower(-.13, .13);
                 basicTel();
                 idle();
             }
             robot.setMotorPower(0,0);
             robot.resetEncoders();
+
         }
     }
 
     public void rollout(int timeoutS){
         runtime.reset();
+        robot.roller.setPower(1);
         while (opModeIsActive() && runtime.seconds() < timeoutS){
-            robot.roller.setPower(1);
+            basicTel();
             idle();
         }
+        robot.roller.setPower(0);
     }
 
     public void turnTowards(int angle, int timeoutS) throws InterruptedException{
@@ -227,8 +234,10 @@ public class RedPosTwoBeaconsSinglePush extends LinearOpMode{
                     idle();
                 }
             }
+
             robot.setMotorPower(0,0);
             robot.resetEncoders();
+            sleep(500);
         }
     }
 
@@ -246,6 +255,8 @@ public class RedPosTwoBeaconsSinglePush extends LinearOpMode{
                 Math.abs(robot.frontRight.getCurrentPosition() - rightTarget) <= TOLERANCE &&
                 Math.abs(robot.backRight.getCurrentPosition() - rightTarget) <= TOLERANCE);
     }
+
+
 
     public void basicTel(){
         telemetry.addData("Back Right Motor", "Target %7d: Current Pos %7d", robot.backRight.getTargetPosition(), robot.backRight.getCurrentPosition());

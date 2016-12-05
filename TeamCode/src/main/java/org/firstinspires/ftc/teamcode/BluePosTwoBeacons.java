@@ -39,9 +39,9 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 //Back left wheel is on the second crack away from the corner vortex on driver side
 //Flush against wall
 
-@Autonomous(name="Red Pos3: BEACON(S)!", group="Red Position 3")
+@Autonomous(name="Blue Pos2: BEACON(S)!", group="Blue Position 2")
 //@Disabled
-public class RedPosThreeBeacons extends LinearOpMode{
+public class BluePosTwoBeacons extends LinearOpMode{
 
     Robot robot   = new Robot();
     private ElapsedTime     runtime = new ElapsedTime();
@@ -80,49 +80,78 @@ public class RedPosThreeBeacons extends LinearOpMode{
         waitForStart();
         elapsed = new ElapsedTime();
 
-        runStraight(25, 10, 1);
-        turnLeft(30, 10);
-        runStraight(39, 5, 1);
-        turnTowards(270, 5);
-        runStraight(20, 4, 1);
-        //runUntilTriggered
-        runStraight(-2, 1, 1);
+        runStraight(20, 10, .6);
+        turnRight(45, 10);
+        runStraight(59, 10, .6);
+        turnRight(45, 3);
+        turnTowards(90, 5);
+        runStraight(11, 4, .6);
+        runStraight(4, 1, .3);
+        runStraight(-2, 1, .6);
         sleep(250);
-        if (!isColorRed()){
+        if (isColorRed()){
             sleep(4700);
-            runStraight(3, 1, 1);
+            runStraight(3, 1, .6);
         }
-        runStraight(-10, 3, 1);
+        runStraight(-10, 3, .6);
 
         if (elapsed.seconds()<17) {
-            turnRight(90,5);
+            turnLeft(90,5);
             turnTowards(0, 2);
-            runStraight(41, 5, 1);
-            turnLeft(90, 5);
-            turnTowards(270, 5);
-            if (elapsed.seconds() < 23) {
-                runStraight(15, 2, .6);
-                runStraight(-2, 1, .8);
+            runStraight(44, 5, .7);
+            turnRight(95, 5);
+            turnTowards(90, 5);
+            if (elapsed.seconds() < 24) {
+                runStraight(10, 2, .7);
+                runStraight(2, 1, .3);
+                runStraight(-2, 1, .6);
                 sleep(250);
-                if (!isColorRed()) {
+                if (isColorRed()) {
                     sleep(4700);
-                    runStraight(3, 1, .4);
+                    runStraight(3, 1, .3);
                 }
             }
         }
         else{
-            turnRight(45, 5);
-            runStraight(-24, 4, 1);
-            turnLeft(90, 4);
-            turnTowards(230, 5);
-            runStraight(29, 4, 1);
+            turnLeft(45, 5);
+            runStraight(-24, 4, .6);
+            turnRight(85, 2);
+            turnTowards(135, 5);
+            runStraight(29, 4, .7);
             robot.roller.setPower(1);
-            runStraight(4, 5, 1);
+            runStraight(5, 5, .6);
             rollout(10);
         }
 
     }
-    //ENCODER BASED MOVEMENT
+
+
+    /**
+     *This method, runStraight, is our main method for driving straight.
+     *It utilizes the encoders and RunToPosition mode of the encoders to
+     *drive an accurate distance based on the distance input.
+     * @param distance_in_inches is converted into encoder ticks using the private
+     * final doubles at the beginning of each class.
+     * @param timeoutS utilizes the ElapsedTime() object to detect
+     * how much time has passed from the beginning of the method. If it has been too long
+     * in the method, that means something has gone wrong, and the robot moves on.
+     * @param speed allows us to change the speed based upon
+     * time sensitivity and the distance being travelled.
+     *
+     */
+
+    /*
+    This method, runStraight, is our main method for driving straight.
+    It utilizes the encoders and RunToPosition mode of the encoders to
+    drive an accurate distance based on the distance input. The double distance_in_inches
+    converted into encoder ticks using the private final doubles at the beginning of
+    each class. The speed parameter allows us to change the speed based upon
+    time sensitivity and the distance being travelled. The timeout parameter is constant
+    throughout most of our methods. It utilizes the ElapsedTime() object to detect
+    how much time has passed from the beginning of the method. If it has been too long
+    in the method, that means something has gone wrong, and the robot moves on.
+     */
+
     public void runStraight(double distance_in_inches, int timeoutS, double speed) throws InterruptedException{
         if (opModeIsActive()){
             leftTarget = (int) (distance_in_inches * TICKS_PER_INCH);
@@ -130,16 +159,24 @@ public class RedPosThreeBeacons extends LinearOpMode{
             robot.setToEncoderMode();
             setTargetValueMotor();
             runtime.reset();
-            robot.setMotorPower(.4,.4);
+            robot.setMotorPower(speed,speed);
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && !hasReached()) {
+                robot.checkPower(speed, speed);
                 basicTel();
                 idle();
             }
             robot.setMotorPower(0,0);
             robot.resetEncoders();
+            sleep(250);
         }
     }
 
+    /*
+    This method, isColorRed(), utilizes the color sensor. It reads the color
+    sensor's red and blue input when pointed at the beacon to determine which
+    color is more dominant. It returns true when the color is red along with a
+    telemetry update, or false when the color is blue.
+     */
     public boolean isColorRed(){
         if (robot.color.red()>robot.color.blue() && robot.color.red()>=1){
             telemetry.addData("Colors","Red is %d and Blue is %d", robot.color.red(), robot.color.blue());
@@ -153,7 +190,14 @@ public class RedPosThreeBeacons extends LinearOpMode{
         return false;
     }
 
-    //Turning With Gyro's
+    /*
+    This method, turnRight(), is used to turn right a certain number of degrees.
+    The angle parameter it takes in is used to determine the angle it should
+    turn left. The robot makes sure that the target angle stays within the
+    0-359 degree range that the gyro senses. The tolerance of the turn is
+    give or take 3 degrees. This movement method does not use encoders,
+    but it uses the gyro to constantly calculate the angle that the robot is facing.
+     */
     public void turnRight(int angle, int timeoutS) throws InterruptedException{
         if (opModeIsActive()){
             robot.setToWOEncoderMode();
@@ -164,6 +208,7 @@ public class RedPosThreeBeacons extends LinearOpMode{
                 targetAngle-=360;
             }
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-targetAngle)>=4) {
+                robot.checkPower(.13, -.13);
                 basicTel();
                 idle();
             }
@@ -172,7 +217,14 @@ public class RedPosThreeBeacons extends LinearOpMode{
         }
     }
 
-    //Turning With Gyro's
+    /*
+    This method, turnLeft(), is used to turn left a certain number of degrees.
+    The angle parameter it takes in is used to determine the angle it should
+    turn left. The robot makes sure that the target angle stays within the
+    0-359 degree range that the gyro senses. The tolerance of the turn is
+    give or take 3 degrees. This movement method does not use encoders,
+    but it uses the gyro to constantly calculate the angle that the robot is facing.
+    */
     public void turnLeft(int angle, int timeoutS) throws InterruptedException{
         if (opModeIsActive()){
             robot.setToWOEncoderMode();
@@ -183,41 +235,54 @@ public class RedPosThreeBeacons extends LinearOpMode{
                 targetAngle += 360;
             }
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-targetAngle)>=4) {
+                robot.checkPower(-.13, .13);
                 basicTel();
                 idle();
             }
             robot.setMotorPower(0,0);
             robot.resetEncoders();
-
         }
     }
 
-    public void rollout(int timeoutS){
-        runtime.reset();
-        while (opModeIsActive() && runtime.seconds() < timeoutS){
-            robot.roller.setPower(1);
-        }
-    }
-
+    /*
+    This method, turnTowards(), is used for precision turning. Its turns
+    are significantly slower than turnLeft() or turnRight(), but are much
+    more precise. The angle parameter is the angle the robot should turn
+    TO FACE towards between 0-359. It then calculates the fastest way to turn
+    towards that angle by either turning right or left. This movement method does
+    not use encoders, but it uses the gyro to calculate the angle that the robot is facing.
+     */
     public void turnTowards(int angle, int timeoutS) throws InterruptedException{
         if (opModeIsActive()){
             runtime.reset();
             robot.setToWOEncoderMode();
             if (robot.gyro.getHeading()>angle){
                 robot.setMotorPower(-.1,.1);
+                while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-angle)>=3) {
+                    robot.checkPower(-.1, .1);
+                    basicTel();
+                    idle();
+                }
             }
             else{
                 robot.setMotorPower(.1, -.1);
-            }
-            while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-angle)>=3) {
-                basicTel();
-                idle();
+                while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-angle)>=3) {
+                    robot.checkPower(.1, -.1);
+                    basicTel();
+                    idle();
+                }
             }
             robot.setMotorPower(0,0);
             robot.resetEncoders();
         }
     }
 
+    /*
+    This function, setTargetValueMotor(), takes the public target variables
+    and sets each motor to their respective target. This method is called
+    after runStraight() converts the inches input to encoder ticks and sets the
+    motors to RunToPosition mode.
+     */
     public void setTargetValueMotor() {
         robot.frontLeft.setTargetPosition(leftTarget);
         robot.backLeft.setTargetPosition(leftTarget);
@@ -226,18 +291,47 @@ public class RedPosThreeBeacons extends LinearOpMode{
         robot.backRight.setTargetPosition(rightTarget);
     }
 
+    /*
+    This simple function, rollout(), sets the power of our intake roller to 1 in order to
+    output balls into the corner vortex. It then waits for an amount of time
+    which is one of the parameters before setting the power back to 0.
+     */
+    public void rollout(int timeoutS){
+        runtime.reset();
+        robot.roller.setPower(1);
+        while (opModeIsActive() && runtime.seconds() < timeoutS){
+            idle();
+        }
+        robot.roller.setPower(0);
+    }
+
+    /*
+    This method, hasReached(), checks on the position of all of our motors. It checks their
+    current position and if it is within the range of the target position.
+    The range is determined by tolerance which is defined at the beginning of each program.
+    It returns true only if ALL of the motors have achieved their target positions.
+    Otherwise, it always returns false.
+    */
     public boolean hasReached() {
+
         return (Math.abs(robot.frontLeft.getCurrentPosition() - leftTarget) <= TOLERANCE &&
                 Math.abs(robot.backLeft.getCurrentPosition() - leftTarget) <= TOLERANCE &&
                 Math.abs(robot.frontRight.getCurrentPosition() - rightTarget) <= TOLERANCE &&
                 Math.abs(robot.backRight.getCurrentPosition() - rightTarget) <= TOLERANCE);
     }
 
+    /*
+    This method, basicTel(), includes all the possible telemetry data we may require
+    at a given time for troubleshooting purposes. It includes the target position,
+    current position, and power for all the motors, the angle that the robot is facing,
+    the color the color sensor is detecting, and the time elapsed in the autonomous period.
+     */
     public void basicTel(){
-        telemetry.addData("Back Right Motor", "Target %7d: Current Pos %7d", robot.backRight.getTargetPosition(), robot.backRight.getCurrentPosition());
-        telemetry.addData("Front Right Motor", "Target %7d: Current Pos %7d", robot.frontRight.getTargetPosition(), robot.frontRight.getCurrentPosition());
-        telemetry.addData("Back Left Motor", "Target %7d: Current Pos %7d", robot.backLeft.getTargetPosition(), robot.backLeft.getCurrentPosition());
-        telemetry.addData("Front Left Motor", "Target %7d: Current Pos %7d", robot.frontLeft.getTargetPosition(), robot.frontLeft.getCurrentPosition());
+
+        telemetry.addData("Back Right Motor", "Target %7d: Current Pos %7d: Power Taken %7f", robot.backRight.getTargetPosition(), robot.backRight.getCurrentPosition(), robot.backRight.getPower());
+        telemetry.addData("Front Right Motor", "Target %7d: Current Pos %7d: Power Taken %7f", robot.frontRight.getTargetPosition(), robot.frontRight.getCurrentPosition(), robot.frontRight.getPower());
+        telemetry.addData("Back Left Motor", "Target %7d: Current Pos %7d: Power Taken %7f", robot.backLeft.getTargetPosition(), robot.backLeft.getCurrentPosition(), robot.backLeft.getPower());
+        telemetry.addData("Front Left Motor", "Target %7d: Current Pos %7d: Power Taken %7f", robot.frontLeft.getTargetPosition(), robot.frontLeft.getCurrentPosition(), robot.frontLeft.getPower());
         telemetry.addData("Gyro", "Robot is facing %d",robot.gyro.getHeading());
         telemetry.addData("Colors","Red is %d and Blue is %d", robot.color.red(), robot.color.blue());
         telemetry.addData("Time", "Total Elapsed time is %.2f", elapsed.seconds());

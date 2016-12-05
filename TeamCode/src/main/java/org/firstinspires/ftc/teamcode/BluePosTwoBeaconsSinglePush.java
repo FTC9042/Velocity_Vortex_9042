@@ -1,51 +1,19 @@
-/*
-Copyright (c) 2016 Robert Atkinson
-
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without modification,
-are permitted (subject to the limitations in the disclaimer below) provided that
-the following conditions are met:
-
-Redistributions of source code must retain the above copyright notice, this list
-of conditions and the following disclaimer.
-
-Redistributions in binary form must reproduce the above copyright notice, this
-list of conditions and the following disclaimer in the documentation and/or
-other materials provided with the distribution.
-
-Neither the name of Robert Atkinson nor the names of his contributors may be used to
-endorse or promote products derived from this software without specific prior
-written permission.
-
-NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY THIS
-LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
-THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESSFOR A PARTICULAR PURPOSE
-ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
-FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
-TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
-THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-/*Position one is with the back left wheel touching the wall at the first crack between two mats
-Parallel to the midway line
-*/
+//Back left wheel is on the second crack away from the corner vortex on driver side
+//Flush against wall
 
-@Autonomous(name="Blue Pos1: Park Partial Middle", group="Blue Position 1")
+@Autonomous(name="Blue Pos2: BEACON(S) Single Push!", group="Blue Position 2")
 //@Disabled
-public class BluePosOneParkMiddle extends LinearOpMode{
+public class BluePosTwoBeaconsSinglePush extends LinearOpMode{
 
     Robot robot   = new Robot();
     private ElapsedTime     runtime = new ElapsedTime();
+    private ElapsedTime     elapsed;
 
     //encoder targets
     private int rightTarget,
@@ -60,14 +28,16 @@ public class BluePosOneParkMiddle extends LinearOpMode{
 
     @Override
     public void runOpMode() throws InterruptedException {
+
         robot.init(hardwareMap);
+        robot.color.enableLed(false);
 
         robot.resetGyro();
         robot.setDirection();
         robot.resetEncoders();
-        telemetry.addData("Status", "Resetting Encoders | Left:"+ robot.backLeft.getCurrentPosition()+" Right:"+robot.backRight.getCurrentPosition());
-        while (robot.gyro.isCalibrating() && !opModeIsActive()){
-            telemetry.addData("Status", "Gyro is Resetting. Currently at "+ robot.gyro.getHeading());
+        telemetry.addData("Status", "Resetting Encoders | Left:" + robot.backLeft.getCurrentPosition() + " Right:" + robot.backRight.getCurrentPosition());
+        while (robot.gyro.isCalibrating() && !opModeIsActive()) {
+            telemetry.addData("Status", "Gyro is Resetting. Currently at " + robot.gyro.getHeading());
             telemetry.update();
 
             idle();
@@ -76,29 +46,97 @@ public class BluePosOneParkMiddle extends LinearOpMode{
         telemetry.update();
 
         waitForStart();
+        elapsed = new ElapsedTime();
 
-        telemetry.addData("Status", "Going Straight 64 inches");
-        telemetry.update();
-        runStraight(64, 10);
+        runStraight(19, 10, .7);
+        turnRight(45, 10);
+        runStraight(60, 10, .7);
+        turnRight(45, 3);
+        turnTowards(90, 5);
+        runStraight(10 , 4, .6);
+        if (!isColorRed()){
+            turnTowards(94, 3);
+        }
+        else{
+            turnTowards(86, 3);
+        }
+        runStraight(4, 1, .3);
+        runStraight(-3, 1, .3);
+        turnTowards(90, 2);
+        if (isColorRed()) {
+            sleep(4900);
+            runStraight(3, 1, .6);
+        }
+        runStraight(-10, 3, .6);
+
+        if (elapsed.seconds() < 17) {
+            turnLeft(85, 5);
+            turnTowards(0, 2);
+            runStraight(47, 5, .6);
+            turnRight(95, 5);
+            turnTowards(90, 5);
+            if (elapsed.seconds() < 25) {
+                runStraight(11, 2, .4);
+                if (!isColorRed()){
+                    turnTowards(94, 3);
+                }
+                else{
+                    turnTowards(86, 3);
+                }
+                runStraight(3, 1, .3);
+                runStraight(-2, 1, 1);
+                if (isColorRed()) {
+                    sleep(4900);
+                    runStraight(3, 1, .3);
+                }
+                turnLeftSUPERFAST(30, 3);
+                robot.setToCoast();
+                runStraight(-80, 6, 1);
+            }
+        }
+
+        else {
+            turnLeft(45, 5);
+            runStraight(-24, 4, .6);
+            turnRight(90, 3);
+            turnTowards(135, 5);
+            runStraight(29, 4, .6);
+            robot.roller.setPower(1);
+            runStraight(4, 5, .6);
+            rollout(10);
+        }
     }
     //ENCODER BASED MOVEMENT
-    public void runStraight(double distance_in_inches, int timeoutS) throws InterruptedException{
+    public void runStraight(double distance_in_inches, int timeoutS, double speed) throws InterruptedException{
         if (opModeIsActive()){
             leftTarget = (int) (distance_in_inches * TICKS_PER_INCH);
             rightTarget = leftTarget;
             robot.setToEncoderMode();
             setTargetValueMotor();
             runtime.reset();
-            robot.setMotorPower(.4,.4);
+            robot.setMotorPower(speed,speed);
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && !hasReached()) {
-                robot.checkPower(.4, .4);
+                robot.checkPower(speed, speed);
                 basicTel();
                 idle();
             }
             robot.setMotorPower(0,0);
             robot.resetEncoders();
-            sleep(1000);
+            sleep(250);
         }
+    }
+
+    public boolean isColorRed(){
+        if (robot.color.red()>robot.color.blue() && robot.color.red()>=1){
+            telemetry.addData("Colors","Red is %d and Blue is %d", robot.color.red(), robot.color.blue());
+            telemetry.addData("Course","The color detected was red");
+            telemetry.update();
+            return true;
+        }
+        telemetry.addData("Colors","Red is %d and Blue is %d", robot.color.red(), robot.color.blue());
+        telemetry.addData("Course","The color detected was blue");
+        telemetry.update();
+        return false;
     }
 
     //Turning With Gyro's
@@ -106,13 +144,33 @@ public class BluePosOneParkMiddle extends LinearOpMode{
         if (opModeIsActive()){
             robot.setToWOEncoderMode();
             runtime.reset();
-            robot.setMotorPower(.1,-.1);
+            robot.setMotorPower(.13,-.13);
             int targetAngle = robot.gyro.getHeading()+angle;
             if (targetAngle>=360){
                 targetAngle-=360;
             }
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-targetAngle)>=4) {
-                robot.checkPower(.1, -.1);
+                robot.checkPower(.13, -.13);
+                basicTel();
+                idle();
+            }
+            robot.setMotorPower(0,0);
+            robot.resetEncoders();
+        }
+    }
+
+    //Turning With Gyro's
+    public void turnLeftSUPERFAST(int angle, int timeoutS) throws InterruptedException{
+        if (opModeIsActive()){
+            robot.setToWOEncoderMode();
+            runtime.reset();
+            robot.setMotorPower(-.4,.4);
+            int targetAngle = robot.gyro.getHeading()-angle;
+            if (targetAngle<0){
+                targetAngle += 360;
+            }
+            while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-targetAngle)>=4) {
+                robot.checkPower(-.4, .4);
                 basicTel();
                 idle();
             }
@@ -126,19 +184,18 @@ public class BluePosOneParkMiddle extends LinearOpMode{
         if (opModeIsActive()){
             robot.setToWOEncoderMode();
             runtime.reset();
-            robot.setMotorPower(-.1,.1);
+            robot.setMotorPower(-.13,.13);
             int targetAngle = robot.gyro.getHeading()-angle;
             if (targetAngle<0){
                 targetAngle += 360;
             }
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-targetAngle)>=4) {
-                robot.checkPower(-.1, .1);
+                robot.checkPower(-.13, .13);
                 basicTel();
                 idle();
             }
             robot.setMotorPower(0,0);
             robot.resetEncoders();
-
         }
     }
 
@@ -146,6 +203,7 @@ public class BluePosOneParkMiddle extends LinearOpMode{
         runtime.reset();
         while (opModeIsActive() && runtime.seconds() < timeoutS){
             robot.roller.setPower(1);
+            idle();
         }
     }
 
@@ -169,10 +227,8 @@ public class BluePosOneParkMiddle extends LinearOpMode{
                     idle();
                 }
             }
-
             robot.setMotorPower(0,0);
             robot.resetEncoders();
-            sleep(500);
         }
     }
 
@@ -198,7 +254,7 @@ public class BluePosOneParkMiddle extends LinearOpMode{
         telemetry.addData("Front Left Motor", "Target %7d: Current Pos %7d", robot.frontLeft.getTargetPosition(), robot.frontLeft.getCurrentPosition());
         telemetry.addData("Gyro", "Robot is facing %d",robot.gyro.getHeading());
         telemetry.addData("Colors","Red is %d and Blue is %d", robot.color.red(), robot.color.blue());
+        telemetry.addData("Time", "Total Elapsed time is %.2f", elapsed.seconds());
         telemetry.update();
     }
-
 }

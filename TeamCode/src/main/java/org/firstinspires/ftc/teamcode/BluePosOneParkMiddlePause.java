@@ -36,12 +36,13 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-//Back left wheel is on the first crack away from the corner vortex on driver side
-//Flush against wall
+/*Position one is with the back left wheel touching the wall at the first crack between two mats
+Parallel to the midway line
+*/
 
-@Autonomous(name="Red Pos3: Only Park Corner", group="Red Position 3")
+@Autonomous(name="Blue Pos1: Park Partial Middle (15 sec Pause)", group="Blue Position 1")
 //@Disabled
-public class RedPosTwoOnlyParkCorner extends LinearOpMode{
+public class BluePosOneParkMiddlePause extends LinearOpMode{
 
     Robot robot   = new Robot();
     private ElapsedTime     runtime = new ElapsedTime();
@@ -59,7 +60,6 @@ public class RedPosTwoOnlyParkCorner extends LinearOpMode{
 
     @Override
     public void runOpMode() throws InterruptedException {
-
         robot.init(hardwareMap);
 
         robot.resetGyro();
@@ -77,28 +77,10 @@ public class RedPosTwoOnlyParkCorner extends LinearOpMode{
 
         waitForStart();
 
-        telemetry.addData("Status", "Forward 30 Inches");
+        sleep(15000);
+        telemetry.addData("Status", "Going Straight 64 inches");
         telemetry.update();
-        runStraight(30, 10);
-        telemetry.addData("Status", "Turn Left 45 Degrees");
-        telemetry.update();
-        turnLeft(45, 10);
-        telemetry.addData("Status", "Forward 15 Inches");
-        telemetry.update();
-        runStraight(16,5);
-        telemetry.addData("Status", "Turn left 90 Degrees");
-        telemetry.update();
-        turnLeft(90, 10);
-        telemetry.addData("Status", "Forwards 50 Inches");
-        telemetry.update();
-        runStraight(15, 10);
-        telemetry.addData("Status", "Aligning for Outtake");
-        telemetry.update();
-        turnTowards(225,5);
-        runStraight(17,5);
-        telemetry.addData("Status", "Outtake the balls");
-        telemetry.update();
-        rollout(10);
+        runStraight(64, 10);
     }
     //ENCODER BASED MOVEMENT
     public void runStraight(double distance_in_inches, int timeoutS) throws InterruptedException{

@@ -13,7 +13,8 @@ public class Robot
     DcMotor backLeft, frontLeft, frontRight, backRight;
 
     //Manipulator Motors
-    DcMotor roller;
+    DcMotor roller,
+            trollMode;
 
     GyroSensor gyro;
 
@@ -44,12 +45,15 @@ public class Robot
 
         //Manipulators
         roller = hardwareMap.dcMotor.get("intake");
+        trollMode = hardwareMap.dcMotor.get("troll");
 
         //Sensors
         gyro = hardwareMap.gyroSensor.get("gyro");
         color = hardwareMap.colorSensor.get("color");
         bumper = hardwareMap.touchSensor.get("bumper");
 
+
+        setToBrake();
 
 
         backLeft.setPower(0);
@@ -117,7 +121,6 @@ public class Robot
         backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     }
 
-
     /**
      * Sets the direction config of motors
      */
@@ -151,10 +154,26 @@ public class Robot
      */
     public void setMotorPower(double leftpower, double rightpower){
         backRight.setPower(rightpower);
+        backLeft.setPower(leftpower);
+
+        frontLeft.setPower(leftpower);
         frontRight.setPower(rightpower);
 
-        backLeft.setPower(leftpower);
-        frontLeft.setPower(leftpower);
+    }
+
+    public void setToBrake(){
+
+        backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+    }
+
+    public void setToCoast(){
+        backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
     }
 
     /**
