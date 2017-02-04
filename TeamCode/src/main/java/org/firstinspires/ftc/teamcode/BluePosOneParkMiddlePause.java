@@ -40,7 +40,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 Parallel to the midway line
 */
 
-@Autonomous(name="Blue Pos1: Park Partial Middle (15 sec Pause)", group="Blue Position 1")
+@Autonomous(name="Just Pos1: SHOOT! :D", group="Blue Position 1")
 //@Disabled
 public class BluePosOneParkMiddlePause extends LinearOpMode{
 
@@ -62,43 +62,36 @@ public class BluePosOneParkMiddlePause extends LinearOpMode{
     public void runOpMode() throws InterruptedException {
         robot.init(hardwareMap);
 
-        robot.resetGyro();
-        robot.setDirection();
-        robot.resetEncoders();
-        telemetry.addData("Status", "Resetting Encoders | Left:"+ robot.backLeft.getCurrentPosition()+" Right:"+robot.backRight.getCurrentPosition());
-        while (robot.gyro.isCalibrating() && !opModeIsActive()){
-            telemetry.addData("Status", "Gyro is Resetting. Currently at "+ robot.gyro.getHeading());
-            telemetry.update();
-
-            idle();
-        }
-        telemetry.addData("Status", "Gyro is done Calibrating.");
-        telemetry.update();
 
         waitForStart();
 
-        sleep(15000);
-        telemetry.addData("Status", "Going Straight 64 inches");
-        telemetry.update();
-        runStraight(64, 10);
+        robot.shoot(.64);
+        sleep(3000);
+        robot.elevator.setPower(-.5);
+        sleep(1500);
+        robot.elevator.setPower(0);
+        robot.stopShooter();
+        sleep(3000);
+//        runStraight(-64, 10, .6);
     }
+
     //ENCODER BASED MOVEMENT
-    public void runStraight(double distance_in_inches, int timeoutS) throws InterruptedException{
+    public void runStraight(double distance_in_inches, int timeoutS, double speed) throws InterruptedException{
         if (opModeIsActive()){
             leftTarget = (int) (distance_in_inches * TICKS_PER_INCH);
             rightTarget = leftTarget;
             robot.setToEncoderMode();
             setTargetValueMotor();
             runtime.reset();
-            robot.setMotorPower(.4,.4);
+            robot.setMotorPower(speed,speed);
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && !hasReached()) {
-                robot.checkPower(.4, .4);
+                robot.checkPower(speed, speed);
                 basicTel();
                 idle();
             }
             robot.setMotorPower(0,0);
             robot.resetEncoders();
-            sleep(1000);
+            sleep(250);
         }
     }
 
@@ -122,60 +115,7 @@ public class BluePosOneParkMiddlePause extends LinearOpMode{
         }
     }
 
-    //Turning With Gyro's
-    public void turnLeft(int angle, int timeoutS) throws InterruptedException{
-        if (opModeIsActive()){
-            robot.setToWOEncoderMode();
-            runtime.reset();
-            robot.setMotorPower(-.1,.1);
-            int targetAngle = robot.gyro.getHeading()-angle;
-            if (targetAngle<0){
-                targetAngle += 360;
-            }
-            while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-targetAngle)>=4) {
-                robot.checkPower(-.1, .1);
-                basicTel();
-                idle();
-            }
-            robot.setMotorPower(0,0);
-            robot.resetEncoders();
 
-        }
-    }
-
-    public void rollout(int timeoutS){
-        runtime.reset();
-        while (opModeIsActive() && runtime.seconds() < timeoutS){
-            robot.roller.setPower(1);
-        }
-    }
-
-    public void turnTowards(int angle, int timeoutS) throws InterruptedException{
-        if (opModeIsActive()){
-            runtime.reset();
-            robot.setToWOEncoderMode();
-            if (robot.gyro.getHeading()>angle){
-                robot.setMotorPower(-.1,.1);
-                while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-angle)>=3) {
-                    robot.checkPower(-.1, .1);
-                    basicTel();
-                    idle();
-                }
-            }
-            else{
-                robot.setMotorPower(.1, -.1);
-                while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-angle)>=3) {
-                    robot.checkPower(.1, -.1);
-                    basicTel();
-                    idle();
-                }
-            }
-
-            robot.setMotorPower(0,0);
-            robot.resetEncoders();
-            sleep(500);
-        }
-    }
 
     public void setTargetValueMotor() {
         robot.frontLeft.setTargetPosition(leftTarget);

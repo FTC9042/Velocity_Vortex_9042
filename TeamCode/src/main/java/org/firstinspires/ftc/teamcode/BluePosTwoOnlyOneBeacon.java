@@ -39,9 +39,9 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 //Back left wheel is on the second crack away from the corner vortex on driver side
 //Flush against wall
 
-@Autonomous(name="Red Pos3: BEACON(S) Single Push", group="Red Position 3")
+@Autonomous(name="Blue Pos2: One Beacon and Shoot!", group="Blue Position 2")
 //@Disabled
-public class RedPosThreeBeaconsSinglePush extends LinearOpMode{
+public class BluePosTwoOnlyOneBeacon extends LinearOpMode{
 
     Robot robot   = new Robot();
     private ElapsedTime     runtime = new ElapsedTime();
@@ -58,6 +58,10 @@ public class RedPosThreeBeaconsSinglePush extends LinearOpMode{
             TOLERANCE = 40,
             ROBOT_WIDTH = 14.5;
 
+    private double targetRPM = 4100, currentRPM = 0, shooterSpeed = 0.45;
+    private ElapsedTime RPMCycle;
+
+
     @Override
     public void runOpMode() throws InterruptedException {
 
@@ -67,6 +71,7 @@ public class RedPosThreeBeaconsSinglePush extends LinearOpMode{
         robot.resetGyro();
         robot.setDirection();
         robot.resetEncoders();
+        robot.setToBrake();
         telemetry.addData("Status", "Resetting Encoders | Left:"+ robot.backLeft.getCurrentPosition()+" Right:"+robot.backRight.getCurrentPosition());
         while (robot.gyro.isCalibrating() && !opModeIsActive()){
             telemetry.addData("Status", "Gyro is Resetting. Currently at "+ robot.gyro.getHeading());
@@ -77,69 +82,66 @@ public class RedPosThreeBeaconsSinglePush extends LinearOpMode{
         telemetry.addData("Status", "Gyro is done Calibrating.");
         telemetry.update();
 
-        robot.setToBrake();
         waitForStart();
         elapsed = new ElapsedTime();
 
-        runStraight(10, 10, .5);
+        runStraight(19, 10, .6);
         turnLeft(45, 10);
-        runStraight(39, 5, .6);
-        turnRight(45, 3);
-        if(!checkAngle(0)) {
-            turnTowards(0, 3);
-        }
-        runStraight(19, 6, .6);
-        turnLeft(90, 3);
-        if(!checkAngle(270)){
-            turnTowards(270, 4);
-        }
-        runStraight(5, 3, .5);
-        if (isColorRed()){
-            turnTowards(274, 3);
+        runStraight(54, 10, .7);
+        turnLeft(45, 5);
+        turnTowards(90, 5);
+        runStraight(18, 4, .6);
+        if (!isColorRed()){
+            turnTowards(94, 3);
         }
         else{
-            turnTowards(266, 3);
+            turnTowards(86, 3);
         }
+        robot.shoot(shooterSpeed);
         runStraight(5, 1, .3);
-        runStraight(-3, 1, .4);
+        runStraight(-2, 1, .3);
+        turnTowards(90, 2);
+        turnTowards(92, 2);
+        currentRPM = robot.getRPM();
+        RPMCycle = new ElapsedTime();
+        while (Math.abs(currentRPM-targetRPM)>100 && opModeIsActive()){
+            if (RPMCycle.milliseconds()>=1000) {
+                if (targetRPM > currentRPM) {
+                    shooterSpeed += 0.02;
+                } else if (targetRPM < currentRPM) {
+                    shooterSpeed -= 0.02;
+                }
+                currentRPM = robot.getRPM();
+                robot.shoot(shooterSpeed);
+                RPMCycle.reset();
+                telemetry.addData("Shooter Status", "Current RPM = "+currentRPM);
+                telemetry.addData("Shooter Status", "Target RPM = "+targetRPM);
+                telemetry.addData("Shooter Status", "Motor Power = "+robot.shooterLeft.getPower());
+                telemetry.update();
+                idle();
+            }
+            else{
+                telemetry.addData("Shooter Status", "Current RPM = "+currentRPM);
+                telemetry.addData("Shooter Status", "Target RPM = "+targetRPM);
+                telemetry.addData("Shooter Status", "Motor Power = "+robot.shooterLeft.getPower());
+                telemetry.update();
+                idle();
+            }
+
+        }
+        robot.elevator.setPower(-.8);
+        sleep(1000);
+        robot.elevator.setPower(-.9);
+        sleep(1000);
+        robot.elevator.setPower(0);
+        robot.stopShooter();
         if (!isColorRed()){
-            sleep(5000);
-            runStraight(3, 1, .4);
+            runStraight(-3, 3, .5);
+            runStraight(3, 3, .5);
         }
-        turnTowards(270, 1);
-        runStraight(-10, 3, .6);
-        if (elapsed.seconds() < 17) {
-            turnRight(88, 5);
-            if (!checkAngle(0)){
-                turnTowards(0, 3);
-            }
-            runStraight(47, 7, .7);
-            turnLeft(90, 5);
-            if (!checkAngle(270)) {
-                turnTowards(270, 5);
-            }
-            if (elapsed.seconds() < 25) {
-                runStraight(12, 2, .4);
-                if (isColorRed()){
-                    turnTowards(274, 3);
-                }
-                else{
-                    turnTowards(266, 3);
-                }
-                runStraight(4, 1, .3);
-                runStraight(-2, 1, .3);
-                if (!isColorRed()) {
-                    sleep(4900);
-                    runStraight(3, 1, .3);
-                }
-                turnRightSUPERFAST(30, 3);
-                robot.setToCoast();
-                runStraight(-80, 6, 1);
-            }
-        }
-
-
-
+        runStraight(-30, 5, .8);
+        turnRight(30, 5);
+        runStraight(-15, 3, .4);
     }
     //ENCODER BASED MOVEMENT
     public void runStraight(double distance_in_inches, int timeoutS, double speed) throws InterruptedException{
@@ -157,6 +159,7 @@ public class RedPosThreeBeaconsSinglePush extends LinearOpMode{
             }
             robot.setMotorPower(0,0);
             robot.resetEncoders();
+            sleep(250);
         }
     }
 
@@ -190,6 +193,7 @@ public class RedPosThreeBeaconsSinglePush extends LinearOpMode{
             }
             robot.setMotorPower(0,0);
             robot.resetEncoders();
+            sleep(250);
         }
     }
 
@@ -198,57 +202,28 @@ public class RedPosThreeBeaconsSinglePush extends LinearOpMode{
         if (opModeIsActive()){
             robot.setToWOEncoderMode();
             runtime.reset();
-            robot.setMotorPower(-.13,.13);
+            robot.setMotorPower(-.13 , .13);
             int targetAngle = robot.gyro.getHeading()-angle;
             if (targetAngle<0){
                 targetAngle += 360;
             }
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-targetAngle)>=4) {
-                robot.checkPower(-.13, .13);
+                robot.checkPower(-.13 , .13);
                 basicTel();
                 idle();
             }
-            robot.setMotorPower(0,0);
+            robot.setMotorPower(0 , 0);
             robot.resetEncoders();
-
-        }
-    }
-
-    //Turning With Gyro's
-    public void turnRightSUPERFAST(int angle, int timeoutS) throws InterruptedException{
-        if (opModeIsActive()){
-            robot.setToWOEncoderMode();
-            runtime.reset();
-            robot.setMotorPower(.4,-.4);
-            int targetAngle = robot.gyro.getHeading()+angle;
-            if (targetAngle>=360){
-                targetAngle-=360;
-            }
-            while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-targetAngle)>=10) {
-                robot.checkPower(.4, -.4);
-                basicTel();
-                idle();
-            }
-            robot.setMotorPower(0,0);
-            robot.resetEncoders();
+            sleep(250);
         }
     }
 
     public void rollout(int timeoutS){
         runtime.reset();
-        robot.roller.setPower(1);
         while (opModeIsActive() && runtime.seconds() < timeoutS){
-            basicTel();
+            robot.roller.setPower(1);
             idle();
         }
-        robot.roller.setPower(0);
-    }
-
-    public boolean checkAngle(int angle){
-        if (Math.abs(robot.gyro.getHeading()-angle)>=2){
-            return false;
-        }
-        return true;
     }
 
     public void turnTowards(int angle, int timeoutS) throws InterruptedException{
@@ -271,9 +246,9 @@ public class RedPosThreeBeaconsSinglePush extends LinearOpMode{
                     idle();
                 }
             }
-
             robot.setMotorPower(0,0);
             robot.resetEncoders();
+            sleep(250);
         }
     }
 
@@ -291,8 +266,6 @@ public class RedPosThreeBeaconsSinglePush extends LinearOpMode{
                 Math.abs(robot.frontRight.getCurrentPosition() - rightTarget) <= TOLERANCE &&
                 Math.abs(robot.backRight.getCurrentPosition() - rightTarget) <= TOLERANCE);
     }
-
-
 
     public void basicTel(){
         telemetry.addData("Back Right Motor", "Target %7d: Current Pos %7d", robot.backRight.getTargetPosition(), robot.backRight.getCurrentPosition());

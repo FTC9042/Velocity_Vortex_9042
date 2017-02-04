@@ -2,10 +2,12 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.GyroSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 public class Robot
 {
@@ -14,7 +16,11 @@ public class Robot
 
     //Manipulator Motors
     DcMotor roller,
-            trollMode;
+            elevator,
+            shooterRight,
+            shooterLeft;
+
+
 
     GyroSensor gyro;
 
@@ -26,6 +32,10 @@ public class Robot
     /* Local OpMode members. */
     HardwareMap hardwareMap  = null;
     private ElapsedTime period  = new ElapsedTime();
+    private ElapsedTime clock = new ElapsedTime();
+
+    private double oldTicks = 0;
+    private double oldRPM = 0;
 
     /* Constructor */
     public Robot() {
@@ -45,13 +55,15 @@ public class Robot
 
         //Manipulators
         roller = hardwareMap.dcMotor.get("intake");
-        trollMode = hardwareMap.dcMotor.get("troll");
+        elevator = hardwareMap.dcMotor.get("ele");
+
+        shooterLeft = hardwareMap.dcMotor.get("left");
+        shooterRight = hardwareMap.dcMotor.get("right");
 
         //Sensors
         gyro = hardwareMap.gyroSensor.get("gyro");
         color = hardwareMap.colorSensor.get("color");
         bumper = hardwareMap.touchSensor.get("bumper");
-
 
         setToBrake();
 
@@ -130,6 +142,8 @@ public class Robot
         frontLeft.setDirection(DcMotor.Direction.FORWARD);
         frontRight.setDirection(DcMotor.Direction.REVERSE);
         roller.setDirection(DcMotor.Direction.FORWARD);
+        shooterLeft.setDirection(DcMotor.Direction.FORWARD);
+        shooterRight.setDirection(DcMotorSimple.Direction.FORWARD);
     }
 
     /**
@@ -161,6 +175,16 @@ public class Robot
 
     }
 
+    public void shoot(double power){
+        shooterLeft.setPower(-power);
+        shooterRight.setPower(power);
+    }
+
+    public void stopShooter(){
+        shooterLeft.setPower(0);
+        shooterRight.setPower(0);
+    }
+
     public void setToBrake(){
 
         backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -188,6 +212,21 @@ public class Robot
         frontLeft.setMaxSpeed(speed);
         frontRight.setMaxSpeed(speed);
     }
+
+
+    public double getRPM(){
+        double encTick = Math.abs(shooterLeft.getCurrentPosition())+Math.abs(shooterRight.getCurrentPosition())/2;
+        double rpm = ((encTick-oldTicks)/27)*60;
+        clock.reset();
+        oldTicks = encTick;
+
+        return rpm;
+    }
+
+//    public double getShooterClock(){
+//        return clock.milliseconds();
+//    }
+
 
     public void checkPower(double leftSide, double rightSide){
         if (backLeft.getPower()!=leftSide){

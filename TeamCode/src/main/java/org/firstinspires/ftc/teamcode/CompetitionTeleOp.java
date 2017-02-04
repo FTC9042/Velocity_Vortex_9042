@@ -21,10 +21,11 @@ public class CompetitionTeleOp extends OpMode {
      * Code to run ONCE when the driver hits INIT
      */
     Robot robot = new Robot();
-    boolean on = false;
-    boolean turningRight = false;
-    boolean turningLeft = false;
-    boolean faceZero = false;
+    double shooterPower = .5;
+    double currentRPM = 0;
+    boolean isShooting;
+    ElapsedTime clicker = new ElapsedTime();
+    double speed = 0;
     @Override
     public void init() {
         telemetry.addData("Status", "Initialized");
@@ -33,7 +34,6 @@ public class CompetitionTeleOp extends OpMode {
         robot.resetEncoders();
         robot.setToWOEncoderMode();
         robot.setDirection();
-        robot.color.enableLed(false);
 
     }
 
@@ -59,94 +59,107 @@ public class CompetitionTeleOp extends OpMode {
     public void loop() {
         telemetry.addData("Status", "Running: " + runtime.toString());
                  //Gamepad 1 (Driver) controls
-            if (gamepad1.right_bumper) {
-                robot.setMotorPower(-.3 * gamepad1.left_stick_y, -.3 * gamepad1.right_stick_y);
-            } else if (gamepad1.y) {
+//            if (gamepad1.right_bumper) {
+//                robot.setMotorPower(-.3 * gamepad1.left_stick_y, -.3 * gamepad1.right_stick_y);
+            if (gamepad1.y) {
                 robot.setMotorPower(.3, .3);
             } else if (gamepad1.a) {
                 robot.setMotorPower(-.3, -.3);
-            } else if (on){
-                if (runtime.seconds()>15){
-                    runtime.reset();
-                }
-                if (runtime.seconds()<10) {
-                    robot.setMotorPower(-.1, -.1);
-                    robot.trollMode.setPower(.8);
-                }
-                else{
-                    on = false;
-                    robot.trollMode.setPower(0);
-                }
-            } else if(turningRight){
-                runtime.reset();
-                if (turnTowards(90)){
-                    robot.setMotorPower(0,0);
-                    turningRight = false;
-                }
-            } else if (turningLeft){
-                runtime.reset();
-                if (turnTowards(270)){
-                    robot.setMotorPower(0,0);
-                    turningLeft = false;
-                }
-            } else if (faceZero){
-                runtime.reset();
-                if (turnTowards(0)){
-                    robot.setMotorPower(0,0);
-                    faceZero = false;
-                }
             }
-            else{
+            else {
                 robot.setMotorPower(-gamepad1.left_stick_y, -gamepad1.right_stick_y);
             }
-
-            //Automatic Turning
-            if (gamepad1.dpad_left){
-                turningLeft = true;
-            }
-            else if (gamepad1.dpad_right){
-                turningRight = true;
-            }
-            else if (gamepad1.dpad_up){
-                faceZero = true;
-            }
+//
+//            //Automatic Turning
+//            if (gamepad1.dpad_left){
+//                turningLeft = true;
+//            }
+//            else if (gamepad1.dpad_right){
+//                turningRight = true;
+//            }
+//            else if (gamepad1.dpad_up){
+//                faceZero = true;
+//            }
 
             //Gamepad 2 (Operator) Controls
             //Intake mechanism Manipulation
             if (gamepad2.y) {
                 robot.roller.setPower(1);
             } else if (gamepad2.a) {
-                robot.roller.setPower(-.5);
+                robot.roller.setPower(-1);
             } else if (gamepad2.x) {
                 robot.roller.setPower(.5);
             } else {
                 robot.roller.setPower(0);
             }
 
-            //Spin Center Vortex Controls
-            if (gamepad2.right_bumper){
-                on = true;
-            }
-            else if (gamepad2.left_bumper){
-                on = false;
+            //purpose of testing the stuff
+            if (gamepad2.dpad_up) {
+                robot.elevator.setPower(-.5);
             }
             else if (gamepad2.dpad_down){
-                robot.trollMode.setPower(-1);
+                robot.elevator.setPower(.5);
             }
-            else if (gamepad2.dpad_up){
-                robot.trollMode.setPower(1);
-            }
-            else if (gamepad2.dpad_right || gamepad2.dpad_left){
-                robot.trollMode.setPower(0);
+            else {
+                robot.elevator.setPower(0);
             }
 
-            //Master Break key to reset everything
-            if (gamepad2.right_trigger>0 && gamepad2.left_trigger>0){
-                turningRight=false;
-                turningLeft=false;
-                faceZero=false;
-                on = false;
+            if (gamepad2.dpad_left&&clicker.seconds()>0.5){
+                shooterPower -= 0.05;
+                clicker.reset();
             }
+            else if (gamepad2.dpad_right && clicker.seconds()>0.5){
+                shooterPower += 0.05;
+                clicker.reset();
+            }
+
+            if (shooterPower>=.95){
+                shooterPower = .9 ;
+            }
+            else if (shooterPower<=.4){
+                shooterPower = .5;
+            }
+
+            if (gamepad2.right_trigger>0){
+                robot.shoot(shooterPower);
+
+            }
+            else if (gamepad2.left_trigger>0 && clicker.seconds()>=0.250){
+                if (currentRPM>=4200){
+                    shooterPower-=0.01;
+                }
+                else if (currentRPM<=4200){
+                    shooterPower+=0.01;
+                }
+                robot.shoot(shooterPower);
+                clicker.reset();
+            }
+            else if (gamepad2.right_trigger>0 && clicker.seconds()>=0.250){
+                if (currentRPM>=5200){
+                    shooterPower-=0.01;
+                }
+                else if (currentRPM<=5200){
+                    shooterPower+=0.01;
+                }
+                robot.shoot(shooterPower);
+                clicker.reset();
+            }
+            else if (gamepad2.right_stick_button||gamepad2.left_stick_button){
+                robot.stopShooter();
+            }
+
+            if (runtime.seconds()>.500){
+                runtime.reset();
+                currentRPM = robot.getRPM();
+            }
+
+
+//            //Master Break key to reset everything
+//            if (gamepad2.right_trigger>0 && gamepad2.left_trigger>0){
+//                turningRight=false;
+//                turningLeft=false;
+//                faceZero=false;
+//            }
 
 
         //Return Encoder Values
@@ -154,26 +167,18 @@ public class CompetitionTeleOp extends OpMode {
         telemetry.addData("Left Front Encoder", "Value is "+robot.frontLeft.getCurrentPosition());
         telemetry.addData("Right Back Encoder", "Value is "+robot.backRight.getCurrentPosition());
         telemetry.addData("Right Front Encoder", "Value is "+robot.frontRight.getCurrentPosition());
+        telemetry.addData("Left Shooter", "Spinning at RPM" +robot.shooterLeft.getCurrentPosition());
         telemetry.addData("Robot Angle","The robot is facing "+robot.gyro.getHeading());
         telemetry.addData("Colors", "Red %d Green %d Blue %d", robot.color.red(), robot.color.green(), robot.color.blue());
+        if (robot.bumper.isPressed()){
+            telemetry.addData("Shooter Status", "Locked and Loaded and Ready to Go");
+        }
+        telemetry.addData("Shooter Speed", "RPM = "+currentRPM);
+        telemetry.addData("Shooter Power", "Power = "+Math.abs(robot.shooterLeft.getPower()));
+        telemetry.addData("Shooter Power Var", "Shooter Power is "+shooterPower);
         telemetry.update();
     }
 
-    public boolean turnTowards(int angle){
-        if (robot.backLeft.getPower()!=-.1 || robot.backLeft.getPower()!=.1) {
-            if (robot.gyro.getHeading() > angle) {
-                robot.setMotorPower(-.15, .15);
-            } else {
-                robot.setMotorPower(.1, -.1);
-            }
-        }
-        if (Math.abs(robot.gyro.getHeading()-angle)>=3){
-            return false;
-        } else{
-            return true;
-        }
-
-    }
     /*
      * Code to run ONCE after the driver hits STOP
      */

@@ -75,10 +75,16 @@ public class RedPosTwoParkMiddle extends LinearOpMode{
         telemetry.update();
 
         waitForStart();
-        telemetry.addData("Status", "Waiting 15 seconds");
-        telemetry.update();
-        telemetry.addData("Status", "Forward 40 Inches");
-        telemetry.update();
+        robot.shoot(.65);
+        sleep(1000);
+        robot.elevator.setPower(-.5);
+        sleep(1000);
+        robot.elevator.setPower(0);
+        sleep(1000);
+        robot.elevator.setPower(-.5);
+        sleep(1000);
+        robot.elevator.setPower(0);
+        robot.stopShooter();
         runStraight(38, 10);
         turnLeft(45,10);
         runStraight(10,10);

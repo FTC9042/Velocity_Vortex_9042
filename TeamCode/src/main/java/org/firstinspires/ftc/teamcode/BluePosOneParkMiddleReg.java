@@ -40,7 +40,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 Parallel to the midway line
 */
 
-@Autonomous(name="Blue Pos1: Park Partial Middle (No Pause)", group="Blue Position 1")
+@Autonomous(name="Just Pos 2: Shoot D:", group="Blue Position 1")
 //@Disabled
 public class BluePosOneParkMiddleReg extends LinearOpMode{
 
@@ -79,7 +79,19 @@ public class BluePosOneParkMiddleReg extends LinearOpMode{
 
         telemetry.addData("Status", "Going Straight 64 inches");
         telemetry.update();
-        runStraight(64, 10);
+        robot.shoot(.75);
+        sleep(2500);
+        robot.elevator.setPower(-.6);
+        sleep(1000);
+        robot.elevator.setPower(0);
+        robot.stopShooter();
+        sleep(3000);
+        robot.shoot(.75);
+        sleep(2500);
+        robot.elevator.setPower(-.6);
+        sleep(2000);
+        robot.elevator.setPower(0);
+        robot.stopShooter();
     }
     //ENCODER BASED MOVEMENT
     public void runStraight(double distance_in_inches, int timeoutS) throws InterruptedException{

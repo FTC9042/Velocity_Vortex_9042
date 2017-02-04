@@ -53,14 +53,14 @@ public class RedPosTwoBeaconsSinglePush extends LinearOpMode{
         runStraight(53, 10, .7);
         turnLeft(45, 3);
         turnTowards(270, 5);
-        runStraight(17, 4, .6);
+        runStraight(18, 4, .6);
         if (isColorRed()){
             turnTowards(274, 3);
         }
         else{
             turnTowards(266, 3);
         }
-        runStraight(4, 1, .3);
+        runStraight(5, 1, .3);
         runStraight(-3, 1, .3);
         turnTowards(270, 1);
         if (!isColorRed()) {
@@ -72,11 +72,11 @@ public class RedPosTwoBeaconsSinglePush extends LinearOpMode{
         if (elapsed.seconds() < 17) {
             turnRight(95, 5);
             turnTowards(0, 2);
-            runStraight(47, 5, .6);
+            runStraight(45, 5, .6);
             turnLeft(87, 5);
             turnTowards(270, 5);
             if (elapsed.seconds() < 25) {
-                runStraight(14, 2, .4);
+                runStraight(13, 2, .4);
                 if (isColorRed()){
                     turnTowards(274, 3);
                 }
