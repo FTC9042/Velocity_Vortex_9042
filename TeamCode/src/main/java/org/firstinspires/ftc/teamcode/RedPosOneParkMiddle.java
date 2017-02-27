@@ -40,7 +40,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 Parallel to the midway line
 */
 
-@Autonomous(name="Red Pos1: Park Partial Middle", group="Red Position 1")
+@Autonomous(name="Red Pos1: Park Partial Middle (Pause)", group="Red Position 1")
 //@Disabled
 public class RedPosOneParkMiddle extends LinearOpMode{
 
@@ -58,30 +58,76 @@ public class RedPosOneParkMiddle extends LinearOpMode{
             TOLERANCE = 40,
             ROBOT_WIDTH = 14.1;
 
+    private double targetRPM = 4600, currentRPM = 0, shooterSpeed = 0.45;
+    private ElapsedTime RPMCycle;
+
     @Override
     public void runOpMode() throws InterruptedException {
 
         robot.init(hardwareMap);
 
-        robot.resetGyro();
         robot.setDirection();
         robot.resetEncoders();
-        telemetry.addData("Status", "Resetting Encoders | Left:"+ robot.backLeft.getCurrentPosition()+" Right:"+robot.backRight.getCurrentPosition());
-        while (robot.gyro.isCalibrating() && !opModeIsActive()){
-            telemetry.addData("Status", "Gyro is Resetting. Currently at "+ robot.gyro.getHeading());
-            telemetry.update();
+        if (robot.gyro.getHeading() != 0) {
+            robot.gyro.calibrate();
+            while (robot.gyro.isCalibrating() && !opModeIsActive()) {
+                telemetry.addData("Status", "Gyro is Resetting. Currently at " + robot.gyro.getHeading());
+                telemetry.update();
 
-            idle();
+                idle();
+            }
+            telemetry.addData("Status", "Gyro is done Calibrating. Heading: "+robot.gyro.getHeading());
+            telemetry.update();
         }
-        telemetry.addData("Status", "Gyro is done Calibrating.");
-        telemetry.update();
+        else{
+            telemetry.addData("Status", "Gyro is already Calibrated. Heading: "+robot.gyro.getHeading());
+            telemetry.update();
+        }
 
         waitForStart();
 
         telemetry.addData("Status", "Going Straight 64 inches");
         telemetry.update();
-        runStraight(64, 10);
+        sleep(10000);
+        shoot();
+        runStraight(-64, 10);
     }
+
+    public void shoot() {
+        currentRPM = robot.getRPM();
+        RPMCycle = new ElapsedTime();
+        while (Math.abs(currentRPM-targetRPM)>100 && opModeIsActive()){
+            if (RPMCycle.milliseconds()>=1000) {
+                if (targetRPM > currentRPM) {
+                    shooterSpeed += 0.01;
+                } else if (targetRPM < currentRPM) {
+                    shooterSpeed -= 0.01;
+                }
+                currentRPM = robot.getRPM();
+                robot.shoot(shooterSpeed);
+                RPMCycle.reset();
+                telemetry.addData("Shooter Status", "Current RPM = "+currentRPM);
+                telemetry.addData("Shooter Status", "Target RPM = "+targetRPM);
+                telemetry.addData("Shooter Status", "Motor Power = "+robot.shooterLeft.getPower());
+                telemetry.update();
+                idle();
+            }
+            else{
+                telemetry.addData("Shooter Status", "Current RPM = "+currentRPM);
+                telemetry.addData("Shooter Status", "Target RPM = "+targetRPM);
+                telemetry.addData("Shooter Status", "Motor Power = "+robot.shooterLeft.getPower());
+                telemetry.update();
+                idle();
+            }
+
+        }
+//        sleep(500);
+        robot.elevator.setPower(-.9);
+        sleep(2000);
+        robot.elevator.setPower(0);
+        robot.stopShooter();
+    }
+
     //ENCODER BASED MOVEMENT
     public void runStraight(double distance_in_inches, int timeoutS) throws InterruptedException{
         if (opModeIsActive()){
@@ -90,9 +136,9 @@ public class RedPosOneParkMiddle extends LinearOpMode{
             robot.setToEncoderMode();
             setTargetValueMotor();
             runtime.reset();
-            robot.setMotorPower(.4,.4);
+            robot.setMotorPower(.5, .5);
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && !hasReached()) {
-                robot.checkPower(.4, .4);
+                robot.checkPower(.5, .5);
                 basicTel();
                 idle();
             }

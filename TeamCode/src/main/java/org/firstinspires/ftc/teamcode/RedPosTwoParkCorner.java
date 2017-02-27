@@ -62,61 +62,78 @@ public class RedPosTwoParkCorner extends LinearOpMode{
     public void runOpMode() throws InterruptedException {
         robot.init(hardwareMap);
 
-        robot.resetGyro();
         robot.setDirection();
         robot.resetEncoders();
-        telemetry.addData("Status", "Resetting Encoders | Left:"+ robot.backLeft.getCurrentPosition()+" Right:"+robot.backRight.getCurrentPosition());
-        while (robot.gyro.isCalibrating() && !opModeIsActive()){
-            telemetry.addData("Status", "Gyro is Resetting. Currently at "+ robot.gyro.getHeading());
-            telemetry.update();
+        if (robot.gyro.getHeading() != 0) {
+            robot.gyro.calibrate();
+            while (robot.gyro.isCalibrating() && !opModeIsActive()) {
+                telemetry.addData("Status", "Gyro is Resetting. Currently at " + robot.gyro.getHeading());
+                telemetry.update();
 
-            idle();
+                idle();
+            }
+            telemetry.addData("Status", "Gyro is done Calibrating. Heading: "+robot.gyro.getHeading());
+            telemetry.update();
         }
-        telemetry.addData("Status", "Gyro is done Calibrating.");
-        telemetry.update();
+        else{
+            telemetry.addData("Status", "Gyro is already Calibrated. Heading: "+robot.gyro.getHeading());
+            telemetry.update();
+        }
 
         waitForStart();
 
 
         telemetry.addData("Status", "Forward 38 Inches");
         telemetry.update();
-        runStraight(38, 10);
+        runStraight(38, 10, .5);
         telemetry.addData("Status", "Turn left 45 degrees");
         telemetry.update();
         turnLeft(45, 10);
         telemetry.addData("Status", "Forward 5 Inches");
         telemetry.update();
-        runStraight(5, 10);
+        runStraight(5, 10, .5);
         telemetry.addData("Status", "Turn Left 45 Degrees");
         telemetry.update();
         turnLeft(45, 10);
-        runStraight(28, 10);
+        runStraight(28, 10, .5);
         telemetry.addData("Status", "Turn left 45 Degrees");
         telemetry.update();
         turnTowards(225,5);
-        runStraight(40, 5);
+        runStraight(40, 5, .5);
         telemetry.addData("Status", "Outtake the balls");
         telemetry.update();
         rollout(10);
     }
-    //ENCODER BASED MOVEMENT
-    public void runStraight(double distance_in_inches, int timeoutS) throws InterruptedException{
+    public void runStraight(double distance_in_inches, int timeoutS, double speed) throws InterruptedException{
         if (opModeIsActive()){
             leftTarget = (int) (distance_in_inches * TICKS_PER_INCH);
             rightTarget = leftTarget;
             robot.setToEncoderMode();
             setTargetValueMotor();
             runtime.reset();
-            robot.setMotorPower(.4,.4);
+            robot.setMotorPower(speed,speed);
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && !hasReached()) {
-                robot.checkPower(.4, .4);
+                robot.checkPower(speed, speed);
                 basicTel();
                 idle();
             }
             robot.setMotorPower(0,0);
             robot.resetEncoders();
-            sleep(1000);
+            sleep(250);
         }
+    }
+
+    public boolean isColorRed(){
+        if (robot.color.red()>robot.color.blue() && robot.color.red()>=1){
+            telemetry.addData("Colors","Red is %d and Blue is %d", robot.color.red(), robot.color.blue());
+            telemetry.addData("Course","The color detected was red");
+            telemetry.update();
+            return true;
+        }
+        telemetry.addData("Colors","Red is %d and Blue is %d", robot.color.red(), robot.color.blue());
+        telemetry.addData("Course","The color detected was blue");
+        telemetry.update();
+        return false;
     }
 
     //Turning With Gyro's
@@ -124,13 +141,33 @@ public class RedPosTwoParkCorner extends LinearOpMode{
         if (opModeIsActive()){
             robot.setToWOEncoderMode();
             runtime.reset();
-            robot.setMotorPower(.1,-.1);
+            robot.setMotorPower(.13,-.13);
             int targetAngle = robot.gyro.getHeading()+angle;
             if (targetAngle>=360){
                 targetAngle-=360;
             }
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-targetAngle)>=4) {
-                robot.checkPower(.1, -.1);
+                robot.checkPower(.13, -.13);
+                basicTel();
+                idle();
+            }
+            robot.setMotorPower(0,0);
+            robot.resetEncoders();
+        }
+    }
+
+    //Turning With Gyro's
+    public void turnRightSUPERFAST(int angle, int timeoutS) throws InterruptedException{
+        if (opModeIsActive()){
+            robot.setToWOEncoderMode();
+            runtime.reset();
+            robot.setMotorPower(.4,-.4);
+            int targetAngle = robot.gyro.getHeading()+angle;
+            if (targetAngle>=360){
+                targetAngle-=360;
+            }
+            while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-targetAngle)>=10) {
+                robot.checkPower(.4, -.4);
                 basicTel();
                 idle();
             }
@@ -144,19 +181,18 @@ public class RedPosTwoParkCorner extends LinearOpMode{
         if (opModeIsActive()){
             robot.setToWOEncoderMode();
             runtime.reset();
-            robot.setMotorPower(-.1,.1);
+            robot.setMotorPower(-.13,.13);
             int targetAngle = robot.gyro.getHeading()-angle;
             if (targetAngle<0){
                 targetAngle += 360;
             }
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-targetAngle)>=4) {
-                robot.checkPower(-.1, .1);
+                robot.checkPower(-.13, .13);
                 basicTel();
                 idle();
             }
             robot.setMotorPower(0,0);
             robot.resetEncoders();
-
         }
     }
 
@@ -164,6 +200,7 @@ public class RedPosTwoParkCorner extends LinearOpMode{
         runtime.reset();
         while (opModeIsActive() && runtime.seconds() < timeoutS){
             robot.roller.setPower(1);
+            idle();
         }
     }
 
@@ -187,10 +224,8 @@ public class RedPosTwoParkCorner extends LinearOpMode{
                     idle();
                 }
             }
-
             robot.setMotorPower(0,0);
             robot.resetEncoders();
-            sleep(500);
         }
     }
 

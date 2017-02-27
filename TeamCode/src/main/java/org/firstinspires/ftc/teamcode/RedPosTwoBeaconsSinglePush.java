@@ -32,18 +32,23 @@ public class RedPosTwoBeaconsSinglePush extends LinearOpMode{
         robot.init(hardwareMap);
         robot.color.enableLed(false);
 
-        robot.resetGyro();
         robot.setDirection();
         robot.resetEncoders();
-        telemetry.addData("Status", "Resetting Encoders | Left:" + robot.backLeft.getCurrentPosition() + " Right:" + robot.backRight.getCurrentPosition());
-        while (robot.gyro.isCalibrating() && !opModeIsActive()) {
-            telemetry.addData("Status", "Gyro is Resetting. Currently at " + robot.gyro.getHeading());
-            telemetry.update();
+        if (robot.gyro.getHeading() != 0) {
+            robot.gyro.calibrate();
+            while (robot.gyro.isCalibrating() && !opModeIsActive()) {
+                telemetry.addData("Status", "Gyro is Resetting. Currently at " + robot.gyro.getHeading());
+                telemetry.update();
 
-            idle();
+                idle();
+            }
+            telemetry.addData("Status", "Gyro is done Calibrating. Heading: "+robot.gyro.getHeading());
+            telemetry.update();
         }
-        telemetry.addData("Status", "Gyro is done Calibrating.");
-        telemetry.update();
+        else{
+            telemetry.addData("Status", "Gyro is already Calibrated. Heading: "+robot.gyro.getHeading());
+            telemetry.update();
+        }
 
         waitForStart();
         elapsed = new ElapsedTime();
@@ -89,9 +94,6 @@ public class RedPosTwoBeaconsSinglePush extends LinearOpMode{
                     sleep(4900);
                     runStraight(3, 1, .3);
                 }
-                turnRightSUPERFAST(30, 3);
-                robot.setToCoast();
-                runStraight(-80, 6, 1);
             }
         }
 

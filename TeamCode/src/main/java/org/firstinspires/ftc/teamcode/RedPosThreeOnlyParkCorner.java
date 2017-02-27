@@ -67,13 +67,6 @@ public class RedPosThreeOnlyParkCorner extends LinearOpMode{
         robot.init(hardwareMap);
 
         /*
-        Resets the Gyro's heading so that the current direction that the
-        robot is facing is set to 0. All other angles are taken in relation
-        to this current position
-         */
-        robot.resetGyro();
-
-        /*
         Sets the direction of all the motors to their correct direction as
         seen in the robot class. This way, all motors are spinning in the correct
         direction each program.
@@ -91,15 +84,21 @@ public class RedPosThreeOnlyParkCorner extends LinearOpMode{
         few lines of code allow time for the gyro to finish calibrating and notify the
         Driver Station that the gyro has not yet finished, and then afterwards when it has finished.
          */
-        telemetry.addData("Status", "Resetting Encoders | Left:"+ robot.backLeft.getCurrentPosition()+" Right:"+robot.backRight.getCurrentPosition());
-        while (robot.gyro.isCalibrating() && !opModeIsActive()){
-            telemetry.addData("Status", "Gyro is Resetting. Currently at "+ robot.gyro.getHeading());
-            telemetry.update();
+        if (robot.gyro.getHeading() != 0) {
+            robot.gyro.calibrate();
+            while (robot.gyro.isCalibrating() && !opModeIsActive()) {
+                telemetry.addData("Status", "Gyro is Resetting. Currently at " + robot.gyro.getHeading());
+                telemetry.update();
 
-            idle();
+                idle();
+            }
+            telemetry.addData("Status", "Gyro is done Calibrating. Heading: "+robot.gyro.getHeading());
+            telemetry.update();
         }
-        telemetry.addData("Status", "Gyro is done Calibrating.");
-        telemetry.update();
+        else{
+            telemetry.addData("Status", "Gyro is already Calibrated. Heading: "+robot.gyro.getHeading());
+            telemetry.update();
+        }
 
         /*
         Waits for the play button to be pressed at the beginning of auton.

@@ -4,9 +4,14 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.GyroSensor;
+import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -16,6 +21,22 @@ public class TestTeleOp extends OpMode {
     /* Declare OpMode members. */
     private ElapsedTime runtime = new ElapsedTime();
 
+    //driving motors
+    DcMotor backLeft, frontLeft, frontRight, backRight;
+
+    //Manipulator Motors
+    DcMotor roller,
+            elevator,
+            shooterRight,
+            shooterLeft;
+
+
+
+    GyroSensor gyro;
+
+    ColorSensor color;
+
+    TouchSensor bumper;
 
     /*
      * Code to run ONCE when the driver hits INIT
@@ -29,7 +50,25 @@ public class TestTeleOp extends OpMode {
     @Override
     public void init() {
         telemetry.addData("Status", "Initialized");
-        robot.init(hardwareMap);
+        backLeft = hardwareMap.dcMotor.get("l2");
+        frontLeft = hardwareMap.dcMotor.get("l1");
+
+        //right drive
+        backRight = hardwareMap.dcMotor.get("r2");
+        frontRight = hardwareMap.dcMotor.get("r1");
+
+        //Manipulators
+        roller = hardwareMap.dcMotor.get("intake");
+        elevator = hardwareMap.dcMotor.get("ele");
+
+        shooterLeft = hardwareMap.dcMotor.get("left");
+        shooterRight = hardwareMap.dcMotor.get("right");
+
+        //Sensors
+        gyro = hardwareMap.gyroSensor.get("gyro");
+        color = hardwareMap.colorSensor.get("color");
+        bumper = hardwareMap.touchSensor.get("bumper");
+
 
         robot.resetEncoders();
         robot.setToWOEncoderMode();
@@ -148,6 +187,8 @@ public class TestTeleOp extends OpMode {
         telemetry.addData("Right Back Encoder", "Value is "+robot.backRight.getCurrentPosition());
         telemetry.addData("Right Front Encoder", "Value is "+robot.frontRight.getCurrentPosition());
         telemetry.addData("Robot Angle","The robot is facing "+robot.gyro.getHeading());
+        telemetry.addData("Gyro Status", ""+robot.gyro.status());
+        telemetry.addData("Gyro Calimbrating?", "Gyro Calibrating?"+robot.gyro.isCalibrating());
         telemetry.addData("Colors", "Red %d Green %d Blue %d", robot.color.red(), robot.color.green(), robot.color.blue());
         if (robot.bumper.isPressed()){
             telemetry.addData("Shooter Status", "Locked and Loaded and Ready to Go");
@@ -157,6 +198,7 @@ public class TestTeleOp extends OpMode {
         telemetry.addData("Shooter Stuff", "Shooter Left Position is "+Math.abs(robot.shooterLeft.getCurrentPosition()));
         telemetry.addData("Shooter Stuff", "Shooter Right Position is "+Math.abs(robot.shooterRight.getCurrentPosition()));
         telemetry.update();
+        robot.color.enableLed(true);
     }
 
     /*
@@ -165,5 +207,8 @@ public class TestTeleOp extends OpMode {
     @Override
     public void stop() {
         robot.setMotorPower(0,0);
+        robot.stopShooter();
+        robot.elevator.setPower(0);
+        robot.roller.setPower(0);
     }
 }

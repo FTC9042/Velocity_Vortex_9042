@@ -40,17 +40,26 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 Parallel to the midway line
 */
 
-@Autonomous(name="JUST SHOOT CLOSE! :))", group="Position 1")
+@Autonomous(name="JUST SHOOT CLOSE! v2", group="Position 1")
 //@Disabled
 public class ShootAuton extends LinearOpMode{
 
     Robot robot   = new Robot();
     private ElapsedTime     runtime = new ElapsedTime();
 
+    //ENCODER CONSTANTS
+    private final double CIRCUMFERENCE_INCHES = 4 * Math.PI,
+            TICKS_PER_ROTATION = 1200 / 0.8522,
+            TICKS_PER_INCH = TICKS_PER_ROTATION / CIRCUMFERENCE_INCHES,
+            TOLERANCE = 40,
+            ROBOT_WIDTH = 14.5;
+
+    private ElapsedTime RPMCycle;
+
     //encoder targets
     private int rightTarget,
             leftTarget;
-    private double targetRPM = 4100, currentRPM = 0, shooterSpeed = 0.47;
+    private double targetRPM = 4150, currentRPM = 0, shooterSpeed = 0.45;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -63,28 +72,199 @@ public class ShootAuton extends LinearOpMode{
         robot.shoot(shooterSpeed);
         sleep(2000);
         currentRPM = robot.getRPM();
+        RPMCycle = new ElapsedTime();
         while (Math.abs(currentRPM-targetRPM)>100 && opModeIsActive()){
-            if (targetRPM>currentRPM){
-                shooterSpeed+=0.02;
-                sleep(100);
+            if (RPMCycle.milliseconds()>=1000) {
+                if (targetRPM > currentRPM) {
+                    shooterSpeed += 0.01;
+                } else if (targetRPM < currentRPM) {
+                    shooterSpeed -= 0.01;
+                }
+                currentRPM = robot.getRPM();
+                robot.shoot(shooterSpeed);
+                RPMCycle.reset();
+                telemetry.addData("Shooter Status", "Current RPM = "+currentRPM);
+                telemetry.addData("Shooter Status", "Target RPM = "+targetRPM);
+                telemetry.addData("Shooter Status", "Motor Power = "+robot.shooterLeft.getPower());
+                telemetry.update();
             }
-            else if (targetRPM<currentRPM){
-                shooterSpeed-=0.02;
-                sleep(100);
+            else{
+                telemetry.addData("Shooter Status", "Current RPM = "+currentRPM);
+                telemetry.addData("Shooter Status", "Target RPM = "+targetRPM);
+                telemetry.addData("Shooter Status", "Motor Power = "+robot.shooterLeft.getPower());
+                telemetry.update();
             }
-            sleep(900);
-            currentRPM = robot.getRPM();
-            robot.shoot(shooterSpeed);
-            telemetry.addData("Shooter Status", "Current RPM = "+currentRPM);
-            telemetry.addData("Shooter Status", "Target RPM = "+targetRPM);
-            telemetry.addData("Shooter Status", "Motor Power = "+robot.shooterLeft.getPower());
-            telemetry.update();
+            idle();
+        }
+        robot.elevator.setPower(-.8);
+        sleep(500);
+        robot.elevator.setPower(0);
+        sleep(500);
+        currentRPM = robot.getRPM();
+        while (Math.abs(currentRPM-targetRPM)>100 && opModeIsActive()){
+            if (RPMCycle.milliseconds()>=1000) {
+                if (targetRPM > currentRPM) {
+                    shooterSpeed += 0.01;
+                } else if (targetRPM < currentRPM) {
+                    shooterSpeed -= 0.01;
+                }
+                currentRPM = robot.getRPM();
+                robot.shoot(shooterSpeed);
+                RPMCycle.reset();
+                telemetry.addData("Shooter Status", "Current RPM = "+currentRPM);
+                telemetry.addData("Shooter Status", "Target RPM = "+targetRPM);
+                telemetry.addData("Shooter Status", "Motor Power = "+robot.shooterLeft.getPower());
+                telemetry.update();
+            }
+            else{
+                telemetry.addData("Shooter Status", "Current RPM = "+currentRPM);
+                telemetry.addData("Shooter Status", "Target RPM = "+targetRPM);
+                telemetry.addData("Shooter Status", "Motor Power = "+robot.shooterLeft.getPower());
+                telemetry.update();
+            }
             idle();
         }
         robot.elevator.setPower(-.9);
-        sleep(2000);
-        robot.elevator.setPower(0);
+        sleep(1000);
         robot.stopShooter();
+
+//
+//        runStraight(-38, 10, .5);
+//        turnLeft(45 , 10);
+//        runStraight(10, 10, .5);
     }
 
+    //ENCODER BASED MOVEMENT
+    public void runStraight(double distance_in_inches, int timeoutS, double speed) throws InterruptedException{
+        if (opModeIsActive()){
+            leftTarget = (int) (distance_in_inches * TICKS_PER_INCH);
+            rightTarget = leftTarget;
+            robot.setToEncoderMode();
+            setTargetValueMotor();
+            runtime.reset();
+            robot.setMotorPower(speed,speed);
+            while (opModeIsActive() && (runtime.seconds() < timeoutS) && !hasReached()) {
+                robot.checkPower(speed, speed);
+                basicTel();
+                idle();
+            }
+            robot.setMotorPower(0,0);
+            robot.resetEncoders();
+            sleep(250);
+        }
+    }
+
+    public boolean isColorRed(){
+        if (robot.color.red()>robot.color.blue() && robot.color.red()>=1){
+            telemetry.addData("Colors","Red is %d and Blue is %d", robot.color.red(), robot.color.blue());
+            telemetry.addData("Course","The color detected was red");
+            telemetry.update();
+            return true;
+        }
+        telemetry.addData("Colors","Red is %d and Blue is %d", robot.color.red(), robot.color.blue());
+        telemetry.addData("Course","The color detected was blue");
+        telemetry.update();
+        return false;
+    }
+
+    //Turning With Gyro's
+    public void turnRight(int angle, int timeoutS) throws InterruptedException{
+        if (opModeIsActive()){
+            robot.setToWOEncoderMode();
+            runtime.reset();
+            robot.setMotorPower(.13,-.13);
+            int targetAngle = robot.gyro.getHeading()+angle;
+            if (targetAngle>=360){
+                targetAngle-=360;
+            }
+            while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-targetAngle)>=4) {
+                robot.checkPower(.13, -.13);
+                basicTel();
+                idle();
+            }
+            robot.setMotorPower(0,0);
+            robot.resetEncoders();
+            sleep(250);
+        }
+    }
+
+    //Turning With Gyro's
+    public void turnLeft(int angle, int timeoutS) throws InterruptedException{
+        if (opModeIsActive()){
+            robot.setToWOEncoderMode();
+            runtime.reset();
+            robot.setMotorPower(-.13 , .13);
+            int targetAngle = robot.gyro.getHeading()-angle;
+            if (targetAngle<0){
+                targetAngle += 360;
+            }
+            while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-targetAngle)>=4) {
+                robot.checkPower(-.13 , .13);
+                basicTel();
+                idle();
+            }
+            robot.setMotorPower(0 , 0);
+            robot.resetEncoders();
+            sleep(250);
+        }
+    }
+
+    public void rollout(int timeoutS){
+        runtime.reset();
+        while (opModeIsActive() && runtime.seconds() < timeoutS){
+            robot.roller.setPower(1);
+            idle();
+        }
+    }
+
+    public void turnTowards(int angle, int timeoutS) throws InterruptedException{
+        if (opModeIsActive()){
+            runtime.reset();
+            robot.setToWOEncoderMode();
+            if (robot.gyro.getHeading()>angle){
+                robot.setMotorPower(-.1,.1);
+                while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-angle)>=3) {
+                    robot.checkPower(-.1, .1);
+                    basicTel();
+                    idle();
+                }
+            }
+            else{
+                robot.setMotorPower(.1, -.1);
+                while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-angle)>=3) {
+                    robot.checkPower(.1, -.1);
+                    basicTel();
+                    idle();
+                }
+            }
+            robot.setMotorPower(0,0);
+            robot.resetEncoders();
+            sleep(250);
+        }
+    }
+
+    public void setTargetValueMotor() {
+        robot.frontLeft.setTargetPosition(leftTarget);
+        robot.backLeft.setTargetPosition(leftTarget);
+
+        robot.frontRight.setTargetPosition(rightTarget);
+        robot.backRight.setTargetPosition(rightTarget);
+    }
+
+    public boolean hasReached() {
+        return (Math.abs(robot.frontLeft.getCurrentPosition() - leftTarget) <= TOLERANCE &&
+                Math.abs(robot.backLeft.getCurrentPosition() - leftTarget) <= TOLERANCE &&
+                Math.abs(robot.frontRight.getCurrentPosition() - rightTarget) <= TOLERANCE &&
+                Math.abs(robot.backRight.getCurrentPosition() - rightTarget) <= TOLERANCE);
+    }
+
+    public void basicTel(){
+        telemetry.addData("Back Right Motor", "Target %7d: Current Pos %7d", robot.backRight.getTargetPosition(), robot.backRight.getCurrentPosition());
+        telemetry.addData("Front Right Motor", "Target %7d: Current Pos %7d", robot.frontRight.getTargetPosition(), robot.frontRight.getCurrentPosition());
+        telemetry.addData("Back Left Motor", "Target %7d: Current Pos %7d", robot.backLeft.getTargetPosition(), robot.backLeft.getCurrentPosition());
+        telemetry.addData("Front Left Motor", "Target %7d: Current Pos %7d", robot.frontLeft.getTargetPosition(), robot.frontLeft.getCurrentPosition());
+        telemetry.addData("Gyro", "Robot is facing %d",robot.gyro.getHeading());
+        telemetry.addData("Colors","Red is %d and Blue is %d", robot.color.red(), robot.color.blue());
+        telemetry.update();
+    }
 }

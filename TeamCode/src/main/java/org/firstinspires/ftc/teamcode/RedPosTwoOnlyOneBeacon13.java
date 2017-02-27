@@ -58,8 +58,9 @@ public class RedPosTwoOnlyOneBeacon13 extends LinearOpMode{
             TOLERANCE = 40,
             ROBOT_WIDTH = 14.5;
 
-    private double targetRPM = 4050, currentRPM = 0, shooterSpeed = 0.5;
+    private double targetRPM = 4100, currentRPM = 0, shooterSpeed = 0.5;
     private ElapsedTime RPMCycle;
+    private ElapsedTime BeaconCoolDown;
 
 
     @Override
@@ -68,29 +69,34 @@ public class RedPosTwoOnlyOneBeacon13 extends LinearOpMode{
         robot.init(hardwareMap);
         robot.color.enableLed(false);
 
-        robot.resetGyro();
         robot.setDirection();
         robot.resetEncoders();
         robot.setToBrake();
-        telemetry.addData("Status", "Resetting Encoders | Left:"+ robot.backLeft.getCurrentPosition()+" Right:"+robot.backRight.getCurrentPosition());
-        while (robot.gyro.isCalibrating() && !opModeIsActive()){
-            telemetry.addData("Status", "Gyro is Resetting. Currently at "+ robot.gyro.getHeading());
-            telemetry.update();
+        if (robot.gyro.getHeading() != 0) {
+            robot.gyro.calibrate();
+            while (robot.gyro.isCalibrating() && !opModeIsActive()) {
+                telemetry.addData("Status", "Gyro is Resetting. Currently at " + robot.gyro.getHeading());
+                telemetry.update();
 
-            idle();
+                idle();
+            }
+            telemetry.addData("Status", "Gyro is done Calibrating. Heading: "+robot.gyro.getHeading());
+            telemetry.update();
         }
-        telemetry.addData("Status", "Gyro is done Calibrating.");
-        telemetry.update();
+        else{
+            telemetry.addData("Status", "Gyro is already Calibrated. Heading: "+robot.gyro.getHeading());
+            telemetry.update();
+        }
 
         waitForStart();
         elapsed = new ElapsedTime();
 
         runStraight(19, 10, .6);
         turnLeft(45, 10);
-        runStraight(53, 10, .7);
+        runStraight(51, 10, .7);
         turnLeft(45, 5);
-        turnTowards(270, 5);
-        runStraight(18, 4, .6);
+        turnTowards(270, 3);
+        runStraight(12, 4, .4);
         robot.shoot(shooterSpeed);
         if (isColorRed()){
             turnTowards(274, 3);
@@ -98,9 +104,10 @@ public class RedPosTwoOnlyOneBeacon13 extends LinearOpMode{
         else{
             turnTowards(266, 3);
         }
-        runStraight(6, 1, .3);
+        runStraight(3, 1, .3);
+        BeaconCoolDown = new ElapsedTime();
         runStraight(-3, 1, .3);
-        turnTowards(273, 4);
+        turnTowards(270, 3);
         currentRPM = robot.getRPM();
         RPMCycle = new ElapsedTime();
         while (Math.abs(currentRPM-targetRPM)>100 && opModeIsActive()){
@@ -129,21 +136,21 @@ public class RedPosTwoOnlyOneBeacon13 extends LinearOpMode{
 
         }
         sleep(500);
-        robot.elevator.setPower(-.8);
-        sleep(1000);
         robot.elevator.setPower(-.9);
-        sleep(1000);
+        sleep(1500);
         robot.elevator.setPower(0);
         robot.stopShooter();
         if (!isColorRed()){
+            if (BeaconCoolDown.milliseconds()<5000){
+                sleep(6000-(long)(BeaconCoolDown.milliseconds()));
+            }
             runStraight(6, 3, .5);
             runStraight(-3, 3, .5);
         }
+        turnLeft(20, 4);
         runStraight(-30, 5, 1);
-        turnRight(10, 5);
-        runStraight(-3, 2, 1);
-        sleep(500);
-        runStraight(-10, 3, .4);
+        turnRight(45, 5);
+        runStraight(-15, 3, .6);
     }
     //ENCODER BASED MOVEMENT
     public void runStraight(double distance_in_inches, int timeoutS, double speed) throws InterruptedException{

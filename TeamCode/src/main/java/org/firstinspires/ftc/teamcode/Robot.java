@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.GyroSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 public class Robot
@@ -28,11 +29,13 @@ public class Robot
 
     TouchSensor bumper;
 
+    ModernRoboticsI2cRangeSensor dist;
 
     /* Local OpMode members. */
     HardwareMap hardwareMap  = null;
     private ElapsedTime period  = new ElapsedTime();
     private ElapsedTime clock = new ElapsedTime();
+    private final double CM_IN = 0.393701;
 
     private double oldTicks = 0;
     private double oldRPM = 0;
@@ -64,6 +67,7 @@ public class Robot
         gyro = hardwareMap.gyroSensor.get("gyro");
         color = hardwareMap.colorSensor.get("color");
         bumper = hardwareMap.touchSensor.get("bumper");
+        dist = hardwareMap.get(ModernRoboticsI2cRangeSensor.class, "distance");
 
         setToBrake();
 
@@ -107,11 +111,7 @@ public class Robot
         backRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
 
-    /**
-     * Resets the heading of the Gyro Sensor by calibrating
-     */
 
-    public void resetGyro()  { gyro.calibrate(); }
 
     /**
      * Sets all motors to RUN_WITHOUT_ENCODER mode
@@ -213,6 +213,8 @@ public class Robot
         frontRight.setMaxSpeed(speed);
     }
 
+    public void resetGyro(){ gyro.calibrate(); }
+
 
     public double getRPM(){
         double encTick = Math.abs(shooterLeft.getCurrentPosition())+Math.abs(shooterRight.getCurrentPosition())/2;
@@ -222,10 +224,6 @@ public class Robot
 
         return rpm;
     }
-
-//    public double getShooterClock(){
-//        return clock.milliseconds();
-//    }
 
 
     public void checkPower(double leftSide, double rightSide){

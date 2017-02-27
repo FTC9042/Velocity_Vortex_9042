@@ -45,10 +45,14 @@ public class BluePosTwoParkMiddle extends LinearOpMode{
 
     Robot robot   = new Robot();
     private ElapsedTime     runtime = new ElapsedTime();
+    private ElapsedTime elapsed;
+    //encoder targets
+    private ElapsedTime RPMCycle;
 
     //encoder targets
     private int rightTarget,
             leftTarget;
+    private double targetRPM = 4200, currentRPM = 0, shooterSpeed = 0.4;
 
     //ENCODER CONSTANTS
     private final double CIRCUMFERENCE_INCHES = 4 * Math.PI,
@@ -59,52 +63,117 @@ public class BluePosTwoParkMiddle extends LinearOpMode{
 
     @Override
     public void runOpMode() throws InterruptedException {
-
         robot.init(hardwareMap);
 
-        robot.resetGyro();
         robot.setDirection();
         robot.resetEncoders();
-        telemetry.addData("Status", "Resetting Encoders | Left:"+ robot.backLeft.getCurrentPosition()+" Right:"+robot.backRight.getCurrentPosition());
-        while (robot.gyro.isCalibrating() && !opModeIsActive()){
-            telemetry.addData("Status", "Gyro is Resetting. Currently at "+ robot.gyro.getHeading());
-            telemetry.update();
+        if (robot.gyro.getHeading() != 0) {
+            robot.gyro.calibrate();
+            while (robot.gyro.isCalibrating() && !opModeIsActive()) {
+                telemetry.addData("Status", "Gyro is Resetting. Currently at " + robot.gyro.getHeading());
+                telemetry.update();
 
-            idle();
+                idle();
+            }
+            telemetry.addData("Status", "Gyro is done Calibrating. Heading: "+robot.gyro.getHeading());
+            telemetry.update();
         }
-        telemetry.addData("Status", "Gyro is done Calibrating.");
-        telemetry.update();
+        else{
+            telemetry.addData("Status", "Gyro is already Calibrated. Heading: "+robot.gyro.getHeading());
+            telemetry.update();
+        }
 
         waitForStart();
-
-        telemetry.addData("Status", "Forward 40 Inches");
-        telemetry.update();
-        robot.shoot(.65);
-        sleep(1000);
-        robot.elevator.setPower(-.5);
-        sleep(1000);
-        robot.elevator.setPower(0);
-        sleep(1000);
-        robot.elevator.setPower(-.5);
-        sleep(1000);
-        robot.elevator.setPower(0);
-        robot.stopShooter();
-        runStraight(38, 10);
+        elapsed = new ElapsedTime();
+        shoot();
+        runStraight(-38, 10, .5);
         turnRight(45,10);
-        runStraight(10,10);
+        runStraight(-10, 10, .5);
+        sleep(500);
+        turnLeft(75, 6);
+        runStraight(-10, 2, .6);
 
     }
 
-    //ENCODER BASED MOVEMENT
-    public void runStraight(double distance_in_inches, int timeoutS) throws InterruptedException{
+    public void runStraight(double distance_in_inches, int timeoutS, double speed) throws InterruptedException{
         if (opModeIsActive()){
             leftTarget = (int) (distance_in_inches * TICKS_PER_INCH);
             rightTarget = leftTarget;
             robot.setToEncoderMode();
             setTargetValueMotor();
             runtime.reset();
-            robot.setMotorPower(.4,.4);
+            robot.setMotorPower(speed,speed);
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && !hasReached()) {
+                robot.checkPower(speed, speed);
+                basicTel();
+                idle();
+            }
+            robot.setMotorPower(0,0);
+            robot.resetEncoders();
+            sleep(250);
+        }
+    }
+
+    public void shoot() {
+        currentRPM = robot.getRPM();
+        RPMCycle = new ElapsedTime();
+        while (Math.abs(currentRPM-targetRPM)>100 && opModeIsActive() && elapsed.seconds()<28.5){
+            if (RPMCycle.milliseconds()>=1000) {
+                if (targetRPM > currentRPM) {
+                    shooterSpeed += 0.01;
+                } else if (targetRPM < currentRPM) {
+                    shooterSpeed -= 0.01;
+                }
+                currentRPM = robot.getRPM();
+                robot.shoot(shooterSpeed);
+                RPMCycle.reset();
+                telemetry.addData("Shooter Status", "Current RPM = "+currentRPM);
+                telemetry.addData("Shooter Status", "Target RPM = "+targetRPM);
+                telemetry.addData("Shooter Status", "Motor Power = "+robot.shooterLeft.getPower());
+                telemetry.update();
+                idle();
+            }
+            else{
+                telemetry.addData("Shooter Status", "Current RPM = "+currentRPM);
+                telemetry.addData("Shooter Status", "Target RPM = "+targetRPM);
+                telemetry.addData("Shooter Status", "Motor Power = "+robot.shooterLeft.getPower());
+                telemetry.update();
+                idle();
+            }
+
+        }
+        sleep(500);
+        robot.elevator.setPower(-.9);
+        sleep(2000);
+        robot.elevator.setPower(0);
+        robot.stopShooter();
+    }
+
+    public boolean isColorRed(){
+        if (robot.color.red()>robot.color.blue() && robot.color.red()>=1){
+            telemetry.addData("Colors","Red is %d and Blue is %d", robot.color.red(), robot.color.blue());
+            telemetry.addData("Course","The color detected was red");
+            telemetry.update();
+            return true;
+        }
+        telemetry.addData("Colors","Red is %d and Blue is %d", robot.color.red(), robot.color.blue());
+        telemetry.addData("Course","The color detected was blue");
+        telemetry.update();
+        return false;
+    }
+
+    //Turning With Gyro's
+    public void turnRight(int angle, int timeoutS) throws InterruptedException{
+        if (opModeIsActive()){
+            robot.setToWOEncoderMode();
+            runtime.reset();
+            robot.setMotorPower(.13,-.13);
+            int targetAngle = robot.gyro.getHeading()+angle;
+            if (targetAngle>=360){
+                targetAngle-=360;
+            }
+            while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-targetAngle)>=4) {
+                robot.checkPower(.13, -.13);
                 basicTel();
                 idle();
             }
@@ -114,16 +183,17 @@ public class BluePosTwoParkMiddle extends LinearOpMode{
     }
 
     //Turning With Gyro's
-    public void turnRight(int angle, int timeoutS) throws InterruptedException{
+    public void turnRightSUPERFAST(int angle, int timeoutS) throws InterruptedException{
         if (opModeIsActive()){
             robot.setToWOEncoderMode();
             runtime.reset();
-            robot.setMotorPower(.1,-.1);
+            robot.setMotorPower(.4,-.4);
             int targetAngle = robot.gyro.getHeading()+angle;
             if (targetAngle>=360){
                 targetAngle-=360;
             }
-            while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-targetAngle)>=4) {
+            while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-targetAngle)>=10) {
+                robot.checkPower(.4, -.4);
                 basicTel();
                 idle();
             }
@@ -137,18 +207,18 @@ public class BluePosTwoParkMiddle extends LinearOpMode{
         if (opModeIsActive()){
             robot.setToWOEncoderMode();
             runtime.reset();
-            robot.setMotorPower(-.1,.1);
+            robot.setMotorPower(-.15,.15);
             int targetAngle = robot.gyro.getHeading()-angle;
             if (targetAngle<0){
                 targetAngle += 360;
             }
             while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-targetAngle)>=4) {
+                robot.checkPower(-.15, .15);
                 basicTel();
                 idle();
             }
             robot.setMotorPower(0,0);
             robot.resetEncoders();
-
         }
     }
 
@@ -156,6 +226,7 @@ public class BluePosTwoParkMiddle extends LinearOpMode{
         runtime.reset();
         while (opModeIsActive() && runtime.seconds() < timeoutS){
             robot.roller.setPower(1);
+            idle();
         }
     }
 
@@ -165,17 +236,22 @@ public class BluePosTwoParkMiddle extends LinearOpMode{
             robot.setToWOEncoderMode();
             if (robot.gyro.getHeading()>angle){
                 robot.setMotorPower(-.1,.1);
+                while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-angle)>=3) {
+                    robot.checkPower(-.1, .1);
+                    basicTel();
+                    idle();
+                }
             }
             else{
                 robot.setMotorPower(.1, -.1);
-            }
-            while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-angle)>=3) {
-                basicTel();
-                idle();
+                while (opModeIsActive() && (runtime.seconds() < timeoutS) && Math.abs(robot.gyro.getHeading()-angle)>=3) {
+                    robot.checkPower(.1, -.1);
+                    basicTel();
+                    idle();
+                }
             }
             robot.setMotorPower(0,0);
             robot.resetEncoders();
-            sleep(500);
         }
     }
 
@@ -203,5 +279,4 @@ public class BluePosTwoParkMiddle extends LinearOpMode{
         telemetry.addData("Colors","Red is %d and Blue is %d", robot.color.red(), robot.color.blue());
         telemetry.update();
     }
-
 }
